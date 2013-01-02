@@ -9,6 +9,8 @@ import subprocess
 from ami.keys import Keys
 from drivecasa.casa_env import casapy_env
 
+dc_logger = logging.getLogger('drivecasa')
+
 def process_data_listing(listings, output_dir, casa_dir):
     """Args:
     listings: Nested dict mapping raw filenames to various useful information,
@@ -50,7 +52,7 @@ def process_data_listing(listings, output_dir, casa_dir):
                                   casa_dir=casa_dir
                                   )
             except (ValueError, IOError):
-                logging.warn("Hit exception imaging target: " + f[Keys.obs_name])
+                dc_logger.warn("Hit exception imaging target: " + f[Keys.obs_name])
                 continue
     return listings
 
@@ -84,14 +86,14 @@ def get_grouped_file_listings(listings):
     return groups
 
 def output_preamble_to_log(groups):
-    logging.info("*************************")
-    logging.info("Processing:")
+    dc_logger.info("*************************")
+    dc_logger.info("Imaging:")
     for key in sorted(groups.keys()):
-        logging.info("%s:", key)
+        dc_logger.info("%s:", key)
         for f in groups[key]:
-            logging.info("\t %s", f[Keys.obs_name])
-        logging.info("--------------------------------")
-    logging.info("*************************")
+            dc_logger.info("\t %s", f[Keys.obs_name])
+        dc_logger.info("--------------------------------")
+    dc_logger.info("*************************")
 
 
 def ensure_dir(dirname):
@@ -112,8 +114,8 @@ def image_with_casapy(uvfits_filename,
 
     if mask == None:
         mask = ''
-
-    logging.debug("Imaging locals:%s", locals())
+    dc_logger.info("Imaging UVFITS: %s", uvfits_filename)
+    dc_logger.debug("Imaging locals:%s", locals())
     ensure_dir(casa_output_dir)
     ensure_dir(images_output_dir)
 
@@ -179,7 +181,7 @@ def image_with_casapy(uvfits_filename,
             '-c', clean_script
             ]
 
-    logging.debug(" ".join(cmd))
+    dc_logger.debug(" ".join(cmd))
     subprocess.check_call(cmd,
                           cwd=casa_output_dir,
                           env=casapy_env(casa_dir),
