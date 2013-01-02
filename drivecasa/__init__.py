@@ -87,7 +87,7 @@ def get_grouped_file_listings(listings):
 
 def output_preamble_to_log(groups):
     dc_logger.info("*************************")
-    dc_logger.info("Imaging:")
+    dc_logger.info("Processing with casapy:")
     for key in sorted(groups.keys()):
         dc_logger.info("%s:", key)
         for f in groups[key]:
