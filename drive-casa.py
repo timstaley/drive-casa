@@ -1,4 +1,4 @@
-
+#!/usr/bin/python
 import optparse
 import os
 import sys
@@ -9,16 +9,21 @@ import subprocess
 from ami.keys import Keys
 from casa_env import casapy_env
 
-def main():
-    options, listings_file = handle_args(sys.argv[1:])
 
-    print "Opening:", listings_file
-    listings = json.load(open(listings_file))
+def main(listings, output_dir, casa_dir):
+    """Args:
+    listings: Nested dict mapping raw filenames to various useful information,
+                e.g. path to calibrated UVFITs.
+    output_dir: Parent dir where dataset folders reside.
+    casa_dir: Top dir of CASA installation.
+
+    """
+
     groups = get_grouped_file_listings(listings)
     output_preamble_to_log(groups)
     for grp_name in sorted(groups.keys()):
         files = groups[grp_name]
-        grp_dir = os.path.join(os.path.expanduser(options.output_dir),
+        grp_dir = os.path.join(os.path.expanduser(output_dir),
                                str(grp_name))
         casa_output_dir = os.path.join(grp_dir, 'casa')
         images_dir = os.path.join(grp_dir, 'images')
@@ -33,7 +38,7 @@ def main():
                                   niter=200,
                                   threshold_in_jy=f[Keys.est_noise] * 2.5,
                                   mask=target_mask,
-                                  casa_dir=options.casa_dir
+                                  casa_dir=casa_dir
                                   )
 #                    image_std_dev(image_metadata[IKeys.target])
 #
@@ -43,12 +48,12 @@ def main():
                                   niter=400,
                                   threshold_in_jy=f[Keys.est_noise] * 3,
                                   mask=get_circular_mask_string([(256, 256)]),
-                                  casa_dir=options.casa_dir
+                                  casa_dir=casa_dir
                                   )
             except (ValueError, IOError):
                 logging.warn("Hit exception imaging target: " + f[Keys.obs_name])
                 continue
-    return 0
+    return listings
 
 def get_circular_mask_string(xy_pix_tuples, aperture_radius_pix=5):
     mask = ''
@@ -94,29 +99,6 @@ def ensure_dir(dirname):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
-def handle_args(argv):
-    """
-    Default values are defined here.
-    """
-    default_output_dir = os.path.expanduser("~/ami_results")
-    default_casa_dir = os.path.expanduser('/opt/soft/builds/casapy-33.0.16856-002-64b')
-    usage = """usage: %prog [options] datasets_to_process.json\n"""
-    parser = optparse.OptionParser(usage)
-
-    parser.add_option("-o", "--output-dir", default=default_output_dir,
-                      help="Path to output directory (default is : " +
-                            default_output_dir + ")")
-
-    parser.add_option("--casa-dir", default=default_casa_dir,
-                   help="Path to CASA directory, default: " + default_casa_dir)
-
-    options, args = parser.parse_args(argv)
-    options.output_dir = os.path.expanduser(options.output_dir)
-    if len(args) != 1:
-        parser.print_help()
-        sys.exit(1)
-    print "Reducing files listed in:", args[0]
-    return options, args[0]
 
 
 def image_with_casapy(uvfits_filename,
@@ -214,6 +196,30 @@ def image_with_casapy(uvfits_filename,
 #    ms_to_fits(casa_output_dirty + ".image", images_output_dir + basename + ".dirty")
 #    return os.path.abspath(primary_image_path)
 
+def handle_args():
+    """
+    Default values are defined here.
+    """
+    default_output_dir = os.path.expanduser("~/ami_results")
+    default_casa_dir = os.path.expanduser('/opt/soft/builds/casapy-33.0.16856-002-64b')
+    usage = """usage: %prog [options] datasets_to_process.json\n"""
+    parser = optparse.OptionParser(usage)
+
+    parser.add_option("-o", "--output-dir", default=default_output_dir,
+                      help="Path to output directory (default is : " +
+                            default_output_dir + ")")
+
+    parser.add_option("--casa-dir", default=default_casa_dir,
+                   help="Path to CASA directory, default: " + default_casa_dir)
+
+    options, args = parser.parse_args()
+    options.output_dir = os.path.expanduser(options.output_dir)
+    if len(args) != 1:
+        parser.print_help()
+        sys.exit(1)
+    print "Reducing files listed in:", args[0]
+    return options, args[0]
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(levelname)s:%(message)s',
@@ -224,5 +230,9 @@ if __name__ == "__main__":
     log_stdout = logging.StreamHandler(sys.stdout)
     log_stdout.setLevel(logging.INFO)
     logger.addHandler(log_stdout)
-    sys.exit(main())
+    options, listings_file = handle_args()
+    print "Opening:", listings_file
+    listings = json.load(open(listings_file))
+    updated_listings = main(listings, options.output_dir, options.casa_dir)
+    sys.exit(0)
 
