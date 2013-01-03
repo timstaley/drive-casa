@@ -1,3 +1,5 @@
+"""Just some useful CASA scripts, packaged to be callable from elsewhere."""
+
 from __future__ import absolute_import
 import os
 import sys
@@ -6,101 +8,78 @@ import json
 import itertools
 import subprocess
 
-from ami.keys import Keys
+import ami.keys as keys
 from drivecasa.casa_env import casapy_env
 
-dc_logger = logging.getLogger('drivecasa')
-
-def process_data_listing(listings, output_dir, casa_dir):
-    """Args:
-    listings: Nested dict mapping raw filenames to various useful information,
-                e.g. path to calibrated UVFITs.
-    output_dir: Parent dir where dataset folders reside.
-    casa_dir: Top dir of CASA installation.
-
-    """
-
-    groups = get_grouped_file_listings(listings)
-    output_preamble_to_log(groups)
-    for grp_name in sorted(groups.keys()):
-        files = groups[grp_name]
-        grp_dir = os.path.join(os.path.expanduser(output_dir),
-                               str(grp_name))
-        casa_output_dir = os.path.join(grp_dir, 'casa')
-        images_dir = os.path.join(grp_dir, 'images')
-
-        target_mask = get_box_mask_string([(256, 256)], width=256)
-        for f in files:
-            out_dir = os.path.join(casa_output_dir, str(f[Keys.obs_name]))
-            try:
-                image_with_casapy(f[Keys.target_uvfits],
-                                  out_dir,
-                                  images_dir,
-                                  niter=200,
-                                  threshold_in_jy=f[Keys.est_noise] * 2.5,
-                                  mask=target_mask,
-                                  casa_dir=casa_dir
-                                  )
-#                    image_std_dev(image_metadata[IKeys.target])
-#
-                image_with_casapy(f[Keys.cal_uvfits],
-                                  out_dir,
-                                  images_dir,
-                                  niter=400,
-                                  threshold_in_jy=f[Keys.est_noise] * 3,
-                                  mask=get_circular_mask_string([(256, 256)]),
-                                  casa_dir=casa_dir
-                                  )
-            except (ValueError, IOError):
-                dc_logger.warn("Hit exception imaging target: " + f[Keys.obs_name])
-                continue
-    return listings
-
-def get_circular_mask_string(xy_pix_tuples, aperture_radius_pix=5):
-    mask = ''
-    if xy_pix_tuples is None:
-        return mask
-    for coords in xy_pix_tuples:
-        mask += 'circle [ [ {x}pix , {y}pix] , {r}pix ]\n'.format(
-                          x=coords[0], y=coords[1], r=aperture_radius_pix)
-    return mask
-
-
-def get_box_mask_string(xy_pix_tuples, width):
-    mask = ''
-    if xy_pix_tuples is None:
-        return mask
-    for coords in xy_pix_tuples:
-        mask += 'box [ [{lx}pix , {ly}pix]  , [{hx}pix, {hy}pix] ]\n'.format(
-                          lx=coords[0] - width / 2, ly=coords[1] - width / 2,
-                          hx=coords[0] + width / 2, hy=coords[1] + width / 2,)
-    return mask
-
-
-def get_grouped_file_listings(listings):
-    grp_names = list(set([i[Keys.group_name] for i in listings.values()]))
-    groups = {}
-    for g_name in grp_names:
-        grp = [i for i in listings.values() if i[Keys.group_name] == g_name]
-        groups[g_name] = grp
-    return groups
-
-def output_preamble_to_log(groups):
-    dc_logger.info("*************************")
-    dc_logger.info("Processing with casapy:")
-    for key in sorted(groups.keys()):
-        dc_logger.info("%s:", key)
-        for f in groups[key]:
-            dc_logger.info("\t %s", f[Keys.obs_name])
-        dc_logger.info("--------------------------------")
-    dc_logger.info("*************************")
-
+logger = logging.getLogger(__name__)
 
 def ensure_dir(dirname):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
+def process_observation(obs, output_dir, casa_dir):
+    """
+    Processes a pre-processed observation, creating clean and dirty maps
+    for both target and calibrator.
 
+    Args:
+     - obs: Dictionary containing path to target UVFITs and calibrator UVFITs,
+       plus noise estimates.
+     - target_mask: Mask described in CASA string format.
+     - output_dir: Parent dir where dataset folders reside.
+     - casa_dir: Top dir of CASA installation.
+
+    Returns:
+     - obs (currently unchanged input dictionary, but possibly with additional
+       updated information in future)
+
+    """
+
+
+    casa_output_dir = os.path.join(output_dir, 'casa')
+    images_dir = os.path.join(output_dir, 'images')
+
+    out_dir = os.path.join(casa_output_dir, str(obs[keys.obs_name]))
+    target_mask = get_box_mask_string([(256, 256)], width=256)
+    image_with_casapy(obs[keys.target_uvfits],
+                      out_dir,
+                      images_dir,
+                      niter=200,
+                      threshold_in_jy=obs[keys.est_noise] * 2.5,
+                      mask=target_mask,
+                      casa_dir=casa_dir
+                      )
+#                    image_std_dev(image_metadata[Ikeys.target])
+#
+    image_with_casapy(obs[keys.cal_uvfits],
+                      out_dir,
+                      images_dir,
+                      niter=400,
+                      threshold_in_jy=obs[keys.est_noise] * 3,
+                      mask=get_circular_mask_string([(256, 256)]),
+                      casa_dir=casa_dir
+                      )
+    return obs
+
+def get_circular_mask_string(centre_pix_posns, aperture_radius_pix=5):
+    mask = ''
+    if centre_pix_posns is None:
+        return mask
+    for coords in centre_pix_posns:
+        mask += 'circle [ [ {x}pix , {y}pix] , {r}pix ]\n'.format(
+                          x=coords[0], y=coords[1], r=aperture_radius_pix)
+    return mask
+
+
+def get_box_mask_string(centre_pix_posns, width):
+    mask = ''
+    if centre_pix_posns is None:
+        return mask
+    for coords in centre_pix_posns:
+        mask += 'box [ [{lx}pix , {ly}pix]  , [{hx}pix, {hy}pix] ]\n'.format(
+                          lx=coords[0] - width / 2, ly=coords[1] - width / 2,
+                          hx=coords[0] + width / 2, hy=coords[1] + width / 2,)
+    return mask
 
 def image_with_casapy(uvfits_filename,
                       casa_output_dir,
@@ -114,8 +93,7 @@ def image_with_casapy(uvfits_filename,
 
     if mask == None:
         mask = ''
-    dc_logger.info("Imaging UVFITS: %s", uvfits_filename)
-    dc_logger.debug("Imaging locals:%s", locals())
+    logger.debug("Imaging UVFITS: %s,\n locals:%s", uvfits_filename, locals())
     ensure_dir(casa_output_dir)
     ensure_dir(images_output_dir)
 
@@ -181,7 +159,7 @@ def image_with_casapy(uvfits_filename,
             '-c', clean_script
             ]
 
-    dc_logger.debug(" ".join(cmd))
+    logger.debug(" ".join(cmd))
     subprocess.check_call(cmd,
                           cwd=casa_output_dir,
                           env=casapy_env(casa_dir),
