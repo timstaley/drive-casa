@@ -150,19 +150,20 @@ def image_with_casapy(uvfits_filename,
                      .format(casa_output_clean, clean_fits))
 
 
-
-    log_filename = basename + ".casa.log"
+    log_basename = os.path.join(casa_output_dir,basename)
+    log_filename = log_basename + ".casa.log"
     cmd = ["casapy",
             '--nologger',
             '--logfile', log_filename,
             '--nogui',
             '-c', clean_script
             ]
-
     logger.debug(" ".join(cmd))
-    subprocess.check_call(cmd,
-                          cwd=casa_output_dir,
-                          env=casapy_env(casa_dir),
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            )
+    with open(log_basename + ".casa.stdout",'w') as log_stdout:
+        with open(log_basename + ".casa.stderr",'w') as log_stderr:
+            subprocess.check_call(cmd,
+                                  cwd=casa_output_dir,
+                                  env=casapy_env(casa_dir),
+                                    stdout=log_stdout,
+                                    stderr=log_stderr,
+                                    )
