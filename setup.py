@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="drivecasa",
-    version="0.1.0",
+    version="0.1.1",
     packages=['drivecasa'],
     description="""Some useful CASA scripts, packaged to be callable from elsewhere.""",
     author="Tim Staley",
