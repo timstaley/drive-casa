@@ -45,7 +45,7 @@ def process_observation(obs, output_dir, casa_dir):
                       out_dir,
                       images_dir,
                       niter=200,
-                      threshold_in_jy=obs[keys.est_noise] * 2.5,
+                      threshold_in_mjy=obs[keys.est_noise_mjy] * 2.5,
                       mask=target_mask,
                       casa_dir=casa_dir
                       )
@@ -55,7 +55,7 @@ def process_observation(obs, output_dir, casa_dir):
                       out_dir,
                       images_dir,
                       niter=400,
-                      threshold_in_jy=obs[keys.est_noise] * 3,
+                      threshold_in_mjy=obs[keys.est_noise_mjy] * 3,
                       mask=get_circular_mask_string([(256, 256)]),
                       casa_dir=casa_dir
                       )
@@ -85,7 +85,7 @@ def image_with_casapy(uvfits_filename,
                       casa_output_dir,
                       images_output_dir,
                       niter,
-                      threshold_in_jy,
+                      threshold_in_mjy,
                       mask=None,
                       casa_dir='/usr/local'):
 
@@ -100,7 +100,7 @@ def image_with_casapy(uvfits_filename,
     clean_args = {
                "spw": '0:3~7',
                "niter": niter,
-               "threshold": str(threshold_in_jy * 1000.0) + 'mJy',
+               "threshold": str(threshold_in_mjy) + 'mJy',
               "imsize": [512, 512],
               "cell": ['5.0arcsec'],
 #              "weighting":"uniform",
@@ -150,7 +150,7 @@ def image_with_casapy(uvfits_filename,
                      .format(casa_output_clean, clean_fits))
 
 
-    log_basename = os.path.join(casa_output_dir,basename)
+    log_basename = os.path.join(casa_output_dir, basename)
     log_filename = log_basename + ".casa.log"
     cmd = ["casapy",
             '--nologger',
@@ -159,8 +159,8 @@ def image_with_casapy(uvfits_filename,
             '-c', clean_script
             ]
     logger.debug(" ".join(cmd))
-    with open(log_basename + ".casa.stdout",'w') as log_stdout:
-        with open(log_basename + ".casa.stderr",'w') as log_stderr:
+    with open(log_basename + ".casa.stdout", 'w') as log_stdout:
+        with open(log_basename + ".casa.stderr", 'w') as log_stderr:
             subprocess.check_call(cmd,
                                   cwd=casa_output_dir,
                                   env=casapy_env(casa_dir),
