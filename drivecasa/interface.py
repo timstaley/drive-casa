@@ -20,6 +20,20 @@ logger = logging.getLogger(__name__)
 
 
 class Casapy(object):
+    """
+    Handles the interface with casapy.
+
+    Simply instantiate, then use member function 'run_script' to pass
+    valid casapy commands (i.e. python function calls) to casapy.
+
+    .. note::
+        Imported into the root of the ``drivecasa`` package to provide convenient
+        instantiation,
+        e.g::
+
+            casa = drivecasa.Casapy()
+            casa.run_script(['tasklist'])
+    """
     def __init__(self,
                  casa_logfile=None,
                  casa_dir=None,
@@ -30,18 +44,19 @@ class Casapy(object):
                  ):
         """
         **Args:**
-          - casa_logfile: Valid options are: 'None' (use default behaviour of a
+          - casa_logfile: Valid options are: `None` (uses default behaviour of a
             logfile named 'casapy-<date>-<time>.log' in the working directory),
-            'False' (do not log to file), or a string containing a path to save
+            `False` (do not log to file), or a string containing a path to save
             the log to. The path may either be absolute, or specified relative
-            to the current working directory of the python process.
+            to the current working directory of the calling python process.
           - working_dir: The directory casapy will be run from. Casapy drops
             various bits of cruft into this directory, such as ipython log snippets,
             '.last' parameter storage files, etc. You can specify this if the
-            default isn't suitable (though it should be fine on Linux).
+            default of `/tmp/drivecasa` isn't suitable, though it should be fine
+            on Linux.
           - timeout: The maximum time allowed for a single casapy command to
-            complete, in seconds. It may be necessary to increase this for e.g.
-            very complex 'clean' routines.
+            complete, in seconds. It may be necessary to increase this e.g. for
+            very complex `clean` routines.
           - log2term: Use the 'log2term' casapy flag to tell it to echo regular
             log messages to the subprocess casa_out pipe. This provides a running
             commentary on the process, the contents of which are returned by this
@@ -90,26 +105,24 @@ class Casapy(object):
 
     def run_script(self, script, raise_on_severe=True):
         """
+        Run the commands listed in `script`.
+
         **Args:**
           - script: A list of commands to execute.
+            (One command per list element.)
           - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
             encountered in the logging output. Set to ``False`` if you want to
-            attempt to continue execution anyway. (Often useful if e.g.
-            running a basic ``import_uvfits`` (with ``overwrite=False``),
-            since if the data has been imported once before then casapy will
-            raise an error to tell you it will not overwrite the pre-existing
-            files.
+            attempt to continue execution anyway (e.g. if you want to ignore
+            errors caused by trying to re-import UVFITs data when the outputs
+            are pre-existing from a previous run).
 
 
         **Returns:**
             (casa_out, errors)
 
-            I.e. a tuple of the contents of the
-            subprocess casa_out pipe, followed by a list of 'SEVERE' error messages.
-            Both the casa_out string and error list are empty if everything went well
-            (although see also the ``log2term`` arg).
-            If return_stdout is True, then the tuple is prefaced by the stdout pipe
-            contents, giving::
+            Where ``casa_out`` is a line-by-line list containing the contents
+            of the casapy terminal output, and ``errors`` is a line-by-line
+            list of 'SEVERE' error messages.
 
 
         """

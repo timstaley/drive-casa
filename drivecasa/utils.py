@@ -1,6 +1,11 @@
 import os
 
 def ensure_dir(dirname):
+    """
+    Ensure directory exists.
+
+    Roughly equivalent to `mkdir -p`
+    """
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
@@ -30,10 +35,12 @@ def derive_out_path(in_path, out_dir, out_extension='',
     return out_path
 
 def save_script(script, filename):
+    """Save a list of casa commands as a text file"""
     with open(filename, 'w') as fp:
         fp.write('\n'.join(script))
 
 def get_circular_mask_string(centre_pix_posns, aperture_radius_pix=5):
+    """Get a mask string representing circular apertures about (x,y) tuples"""
     mask = ''
     if centre_pix_posns is None:
         return mask
@@ -43,6 +50,7 @@ def get_circular_mask_string(centre_pix_posns, aperture_radius_pix=5):
     return mask
 
 def get_box_mask_string(centre_pix_posns, width):
+    """Get a mask string representing box apertures about (x,y) tuples"""
     mask = ''
     if centre_pix_posns is None:
         return mask

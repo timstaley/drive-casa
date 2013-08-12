@@ -1,3 +1,23 @@
+"""
+Provides convenience functions for composing casapy scripts.
+
+While the casapy scripts can be composed by hand, use of convenience
+functions helps to prevent syntax errors, and allows for various optional
+extras such as forcing overwriting of previous datasets, automatic derivation
+of output filenames, etc.
+
+Note that all the commands have a common set of parameters:
+
+ - script: The list to which the requested commands should be appended.
+ - out_dir: The output directory to place output files in, using a derived
+   filename.
+ - out_path: Overrides out_dir, specifies an output file / directory path exactly.
+ - overwrite: Deletes any pre-existing data at the output location - use with
+   caution!
+
+
+"""
+
 import os
 from drivecasa.utils import ensure_dir, derive_out_path
 import shutil
@@ -7,7 +27,7 @@ from drivecasa.keys import clean_results as clean_result_keys
 def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=False):
     """
     Import UVFITS and convert to .ms format.
-    (Adds relevant command line to script.)
+
 
     If out_path is ``None``, a sensible output .ms directory path will be derived
     by taking the FITS basename, switching the extension to .ms, and locating
@@ -47,10 +67,11 @@ def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
                              overwrite=False):
     """
     Concatenates multiple visibilities into one.
-    (Adds relevant command line to script)
 
-    If out_path is None, then a sensible filename is derived by concatenating
-    the basenames of the input visibilities, with the prefix "concat_".
+    By default, output basename is derived by concatenating
+    the basenames of the input visibilities, with the prefix `concat_`.
+    However, this can result in something very long and unwieldy. Alternatively
+    you may specify the exact out_path, or just the out_basename.
 
     **Returns:** Path to concatenated ms.
     """
@@ -85,19 +106,24 @@ def clean(script,
           ):
     """
     Perform clean process to produce an image/map.
-    (Adds relevant command lines to script)
+
+    If out_path is None, then the output basename is derived by
+    appending a `.clean` or `.dirty` suffix to the input basename. The various
+    outputs are then further suffixed by casa, e.g.
+    `foo.clean.image`, `foo.clean.psf`, etc. Since multiple outputs are
+    generated, this function returns a dictionary detailing the expected paths.
 
     NB Attempting to run with pre-existing outputs and ``overwrite=False``
     *will not* throw an error, in contrast to most other routines.
     From the CASA cookbook, w.r.t. the outputs:
 
-        If an image with that name already exists, it will in general be
+        "If an image with that name already exists, it will in general be
         overwritten. Beware using names of existing images however. If the clean
         is run using an imagename where <imagename>.residual and
         <imagename>.model already exist then clean will continue starting from
         these (effectively restarting from the end of the previous clean).
         Thus, if multiple runs of clean are run consecutively with the same
-        imagename, then the cleaning is incremental (as in the difmap package).
+        imagename, then the cleaning is incremental (as in the difmap package)."
 
     You can override this behaviour by specifying ``overwrite=True``, in which
     case all pre-existing outputs will be deleted.
@@ -106,8 +132,8 @@ def clean(script,
     accordingly.
 
     **Returns**:
-     - Dictionary of paths to resulting image maps, with keys listed
-       as members of ``drivecasa.keys.clean_results``.
+     - Dictionary of paths to resulting image maps, with keys as defined by the
+       members of :py:class:`.keys.clean_results`.
     """
     if other_clean_args is None:
         other_clean_args = {}
@@ -146,12 +172,12 @@ def clean(script,
     return expected_results
 
 
-def export_fits(script, image_path, out_dir=None, out_path=
-                None, overwrite=False):
+def export_fits(script, image_path, out_dir=None, out_path=None,
+                overwrite=False):
     """
     Convert an image ms to FITS format.
-    (Adds relevant command line to script)
-    Returns: Path to resulting FITS file.
+
+    **Returns:** Path to resulting FITS file.
     """
     fits_path = out_path
     if fits_path is None:

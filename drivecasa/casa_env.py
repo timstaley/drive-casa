@@ -1,7 +1,7 @@
-"""Defines various shell environments for use with subprocess.
+"""Convenience routines for manipulating shell environments.
 
 We generally grab the current shell env, then update paths with package specific
-directorys.
+directories.
 
 This is a nice way to ensure everything happens in its own sandbox,
 without confusing interaction between conflicting variables.

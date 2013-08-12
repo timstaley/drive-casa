@@ -1,4 +1,6 @@
-"""Routines for composing and then running CASA scripts."""
+"""
+Routines for composing and then running CASA scripts.
+"""
 
 from __future__ import absolute_import
 import os
