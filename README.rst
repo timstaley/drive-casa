@@ -42,11 +42,10 @@ be of use to you, drop me a line.
  
 Installation
 ------------
-
 *Requirements*:
  - A working installation of ``casapy`` (naturally).
  - `pexpect <http://pypi.python.org/pypi/pexpect/>`_ 
-   (Installed automatically as part of the python setup.) 
+   (As listed in `requirements.txt`.) 
    
 From the command line (preferably within a virtualenv):: 
 
@@ -55,5 +54,10 @@ From the command line (preferably within a virtualenv)::
  pip install numpy #Workaround for buggy scipy/numpy combined install.
  pip install .
 
+
+Documentation
+-------------
+Bare-bones Sphinx-generated documentation can be found at 
+http://drive-casa.readthedocs.org. 
 
 .. _CASA: http://casa.nrao.edu/
