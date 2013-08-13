@@ -3,9 +3,15 @@ drive-casa
 ==========
 A python package for scripting the NRAO CASA_ ``casapy`` pipeline routines.
 
+`drive-casa` provides an interface, and convenience routines, to allow dynamic 
+interaction with casapy *via the command line*, i.e. one can spawn an instance
+of ``casapy``, send it some data reduction commands, do some external 
+analysis on the results, and then run some more casapy routines.
+All from within a single calling python script. In a virtualenv_.
+
 Rationale
 ---------
-Casapy actually makes use of an altered version of IPython to provide a 
+Casapy makes use of an altered version of IPython to provide a 
 user interface, and all of the routines available are in fact python functions.
 This means it *is* possible to write python scripts and run them from within
 ``casapy`` itself. However, there are some compelling reasons not to do so:
@@ -60,4 +66,29 @@ Documentation
 Bare-bones Sphinx-generated documentation can be found at 
 http://drive-casa.readthedocs.org. 
 
+A Brief Example
+---------------
+Basic usage might go something like this::
+
+   import drivecasa
+   casa = drivecasa.Casapy()
+   script=[]
+   uvfits_path = '/path/to/uvdata.fits'
+   vis = drivecasa.commands.import_uvfits(script, uvfits_path)
+   clean_args = {   
+       "spw": '0:3~7',
+       "imsize": [512, 512],
+       "cell": ['5.0arcsec'],
+       "weighting": 'briggs',
+          "robust": 0.5,
+       }
+   dirty_maps = drivecasa.commands.clean(script, vis, niter=0, threshold_in_jy=1,
+                                         other_clean_args=clean_args)
+   dirty_map_fits_image = drivecasa.commands.export_fits(script, dirty_maps['image'])
+   casa.run_script(script) 
+   
+After which, there should be a dirty map converted to FITS format waiting for 
+you.
+
 .. _CASA: http://casa.nrao.edu/
+.. _virtualenv: http://www.virtualenv.org/
