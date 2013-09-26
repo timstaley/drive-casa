@@ -6,8 +6,8 @@ from setuptools import setup
 #    required = f.read().splitlines()
 
 setup(
-    name="drivecasa",
-    version="0.2.0",
+    name="drive-casa",
+    version="0.3.0",
     packages=['drivecasa'],
     description="""Some useful CASA scripts, packaged to be callable from elsewhere.""",
     author="Tim Staley",

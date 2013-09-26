@@ -39,14 +39,14 @@ def save_script(script, filename):
     with open(filename, 'w') as fp:
         fp.write('\n'.join(script))
 
-def get_circular_mask_string(centre_pix_posns, aperture_radius_pix=5):
+def get_circular_mask_string(centre_ra_dec_posns, aperture_radius="1arcmin"):
     """Get a mask string representing circular apertures about (x,y) tuples"""
     mask = ''
-    if centre_pix_posns is None:
+    if centre_ra_dec_posns is None:
         return mask
-    for coords in centre_pix_posns:
-        mask += 'circle [ [ {x}pix , {y}pix] , {r}pix ]\n'.format(
-                          x=coords[0], y=coords[1], r=aperture_radius_pix)
+    for coords in centre_ra_dec_posns:
+        mask += 'circle [ [ {x} , {y}] , {r} ]\n'.format(
+                          x=coords[0], y=coords[1], r=aperture_radius)
     return mask
 
 def get_box_mask_string(centre_pix_posns, width):
