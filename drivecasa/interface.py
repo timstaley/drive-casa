@@ -93,7 +93,12 @@ class Casapy(object):
 
         logger.debug("Starting casa with flags: ")
         logger.debug(" ".join(cmd))
-        self.child = pexpect.spawn('casapy',
+
+        if casa_dir is None:
+            casapy_cmd = 'casapy'  # Assume it's in $PATH
+        else:
+            casapy_cmd = os.path.join(casa_dir, 'bin', 'casapy')
+        self.child = pexpect.spawn(casapy_cmd,
                      cmd,
                      cwd=working_dir,
                      env=casapy_env(casa_dir),
