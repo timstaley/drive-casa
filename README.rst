@@ -4,10 +4,11 @@ drive-casa
 A python package for scripting the NRAO CASA_ ``casapy`` pipeline routines.
 
 `drive-casa` provides an interface, and convenience routines, to allow dynamic 
-interaction with casapy *via the command line*, i.e. one can spawn an instance
-of ``casapy``, send it some data reduction commands, do some external 
-analysis on the results, and then run some more casapy routines.
-All from within a single calling python script. In a virtualenv_.
+interaction with casapy from a *separate* python process via the command line, 
+i.e. one can spawn an instance of ``casapy``, send it some data reduction 
+commands, do some external analysis on the results, 
+and then run some more casapy routines.
+All from within a generic python 2.7 script. In a virtualenv_.
 
 Rationale
 ---------
