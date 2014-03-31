@@ -98,15 +98,29 @@ class Casapy(object):
             casapy_cmd = 'casapy'  # Assume it's in $PATH
         else:
             casapy_cmd = os.path.join(casa_dir, 'bin', 'casapy')
-        self.child = pexpect.spawn(casapy_cmd,
-                     cmd,
-                     cwd=working_dir,
-                     env=casapy_env(casa_dir),
-                     timeout=timeout)
-        if echo_to_stdout:
-            self.child.logfile_read = sys.stdout
-        self.prompt = r'CASA <[0-9]+>:'
-        self.child.expect(self.prompt)
+
+        failed_casapy_spawns = 0
+        self.child=None
+        while failed_casapy_spawns < 3:
+            try:
+                self.child = pexpect.spawn(casapy_cmd,
+                             cmd,
+                             cwd=working_dir,
+                             env=casapy_env(casa_dir),
+                             timeout=timeout)
+                if echo_to_stdout:
+                    self.child.logfile_read = sys.stdout
+                self.prompt = r'CASA <[0-9]+>:'
+                self.child.expect(self.prompt, timeout=60)
+                break
+            except pexpect.TIMEOUT:
+                #Try again
+                failed_casapy_spawns += 1
+                logger.warning("%s CASA spawning timeouts occurred." %
+                                failed_casapy_spawns)
+                self.child=None
+        if self.child is None:
+            raise RuntimeError("Could not spawn CASA instance")
 
     def run_script(self, script, raise_on_severe=True):
         """

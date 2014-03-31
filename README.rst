@@ -10,6 +10,9 @@ commands, do some external analysis on the results,
 and then run some more casapy routines.
 All from within a generic python 2.7 script. In a virtualenv_.
 
+This is particularly useful when you want to embed use of CASA within a larger
+pipeline.
+
 Rationale
 ---------
 Casapy makes use of an altered version of IPython to provide a 
