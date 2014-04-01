@@ -7,7 +7,6 @@ import os
 import sys
 
 import drivecasa.commands
-import drivecasa.keys
 import drivecasa.utils
 from drivecasa.casa_env import casapy_env
 from drivecasa.interface import Casapy
@@ -18,3 +17,4 @@ default_casa_dir = None  # (If available already via external environment paths)
 # default_casa_dir = '/opt/soft/builds/casapy-active'
 
 default_test_ouput_dir = '/tmp/drivecasa-tests'
+

@@ -21,8 +21,10 @@ Note that all the commands have a common set of parameters:
 import os
 from drivecasa.utils import ensure_dir, derive_out_path
 import shutil
+from collections import namedtuple
 
-from drivecasa.keys import clean_results as clean_result_keys
+CleanMaps = namedtuple('CleanMaps', ('image', 'model', 'residual', 'psf', 'mask'))
+
 
 def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=False):
     """
@@ -132,8 +134,8 @@ def clean(script,
     accordingly.
 
     **Returns**:
-     - Dictionary of paths to resulting image maps, with keys as defined by the
-       members of :py:class:`.keys.clean_results`.
+      CleanMaps namedtuple, listing paths for image, model, residual, psf and
+      mask maps.
     """
     if other_clean_args is None:
         other_clean_args = {}
@@ -158,18 +160,19 @@ def clean(script,
     script.append("clean(**{})".format(repr(clean_args)))
 
     ensure_dir(os.path.dirname(cleaned_path))
-    k = clean_result_keys
-    expected_results = {k.image : cleaned_path + '.image',
-            k.model : cleaned_path + '.model',
-            k.residual : cleaned_path + '.residual',
-            k.psf : cleaned_path + '.psf',
-            k.mask : cleaned_path + '.mask',
-            }
+    expected_map_paths = CleanMaps(
+        image = cleaned_path + '.image',
+        model = cleaned_path + '.model',
+        residual = cleaned_path + '.residual',
+        psf = cleaned_path + '.psf',
+        mask = cleaned_path + '.mask',
+        )
+
     if overwrite:
-        for path in expected_results.itervalues():
+        for path in expected_map_paths:
             if os.path.isdir(path):
                 shutil.rmtree(path)
-    return expected_results
+    return expected_map_paths
 
 
 def export_fits(script, image_path, out_dir=None, out_path=None,

@@ -8,7 +8,6 @@ import warnings
 import shutil
 
 from drivecasa import commands
-from drivecasa.keys import clean_results
 from .. import sample_data as test_data
 
 
@@ -54,13 +53,13 @@ class TestClean(TestCase):
 
         print expected_maps
         # Manually ensure target does not pre-exist
-        for map in expected_maps.itervalues():
+        for map in expected_maps:
             if os.path.isdir(map):
                  shutil.rmtree(map)
         # Test in usual case, not-preexisting
         casa_out, errs = self.casa.run_script(script)
 #         print '\n'.join(casa_out)
-        self.assertTrue(os.path.isdir(expected_maps[clean_results.image]))
+        self.assertTrue(os.path.isdir(expected_maps.image))
 
 #    @unittest.skip
     def test_clean_map(self):
@@ -76,11 +75,11 @@ class TestClean(TestCase):
 
         print expected_maps
         # Manually ensure target does not pre-exist
-        for map in expected_maps.itervalues():
+        for map in expected_maps:
             if os.path.isdir(map):
                  shutil.rmtree(map)
         # Test in usual case, not-preexisting
         casa_out, errs = self.casa.run_script(script)
         print '\n'.join(casa_out)
-        self.assertTrue(os.path.isdir(expected_maps[clean_results.image]))
+        self.assertTrue(os.path.isdir(expected_maps.image))
 
