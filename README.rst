@@ -53,16 +53,15 @@ be of use to you, drop me a line.
 Installation
 ------------
 *Requirements*:
- - A working installation of ``casapy`` (naturally).
- - `pexpect <http://pypi.python.org/pypi/pexpect/>`_ 
-   (As listed in `requirements.txt`.) 
-   
-From the command line (preferably within a virtualenv):: 
 
- git clone git://github.com/timstaley/drive-casa.git
- cd drive-casa
- pip install numpy #Workaround for buggy scipy/numpy combined install.
- pip install .
+- A working installation of ``casapy`` (naturally).
+- `pexpect <http://pypi.python.org/pypi/pexpect/>`_ 
+  (As listed in `requirements.txt`, installed automatically when using pip.) 
+   
+drive-casa is now `pip` installable, simply run::
+
+ pip install drive-casa
+
 
 
 Documentation
