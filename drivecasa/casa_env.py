@@ -1,10 +1,5 @@
-"""Convenience routines for manipulating shell environments.
-
-We generally grab the current shell env, then update paths with package specific
-directories.
-
-This is a nice way to ensure everything happens in its own sandbox,
-without confusing interaction between conflicting variables.
+"""
+Convenience routines for manipulating shell environments.
 """
 import os
 
@@ -27,12 +22,15 @@ def _add_bin_lib_python(env, package_group_dir, include_python=True):
 def casapy_env(casa_topdir):
     """Returns an environment dictionary configured for CASA execution.
 
-    `casa_topdir` should either contain the bin / lib directories containing CASA
-    executables and libraries, or be set to None if casa is already available
-    from the default environment.
+    **Args:**
 
-    NB it's not a bad idea to always specify the casa dir anyway,
-    so you don't have to rely on the environment paths being set up already.
+    - `casa_topdir`: should either contain the top-level directory containing
+      CASA installation, or be set to None if casa is already available
+      from the default environment.
+
+    .. note::
+        It's not a bad idea to always specify the casa dir anyway,
+        so you don't have to rely on the environment paths being set up already.
 
     """
     casa_env = {}

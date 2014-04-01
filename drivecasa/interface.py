@@ -27,12 +27,14 @@ class Casapy(object):
     valid casapy commands (i.e. python function calls) to casapy.
 
     .. note::
+
         Imported into the root of the ``drivecasa`` package to provide convenient
-        instantiation,
-        e.g::
+        instantiation, e.g::
 
             casa = drivecasa.Casapy()
             casa.run_script(['tasklist'])
+
+
     """
     def __init__(self,
                  casa_logfile=None,
@@ -44,6 +46,7 @@ class Casapy(object):
                  ):
         """
         **Args:**
+
           - casa_logfile: Valid options are: `None` (uses default behaviour of a
             logfile named 'casapy-<date>-<time>.log' in the working directory),
             `False` (do not log to file), or a string containing a path to save
@@ -66,6 +69,7 @@ class Casapy(object):
             at the price of cluttering your working terminal. As an alternative,
             it is recommended to open a separate terminal and ``tail -f`` the
             casa_logfile.
+
         """
         drivecasa.utils.ensure_dir(working_dir)
         # NB It would make sense to switch off ipython, ('noipython' flag)
@@ -127,21 +131,20 @@ class Casapy(object):
         Run the commands listed in `script`.
 
         **Args:**
-          - script: A list of commands to execute.
-            (One command per list element.)
-          - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
-            encountered in the logging output. Set to ``False`` if you want to
-            attempt to continue execution anyway (e.g. if you want to ignore
-            errors caused by trying to re-import UVFITs data when the outputs
-            are pre-existing from a previous run).
+
+        - script: A list of commands to execute.
+          (One command per list element.)
+        - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
+          encountered in the logging output. Set to ``False`` if you want to
+          attempt to continue execution anyway (e.g. if you want to ignore
+          errors caused by trying to re-import UVFITs data when the outputs
+          are pre-existing from a previous run).
 
 
-        **Returns:**
-            (casa_out, errors)
-
-            Where ``casa_out`` is a line-by-line list containing the contents
-            of the casapy terminal output, and ``errors`` is a line-by-line
-            list of 'SEVERE' error messages.
+        **Returns:** Tuple ``(casa_out, errors)``
+        Where ``casa_out`` is a line-by-line list containing the contents
+        of the casapy terminal output, and ``errors`` is a line-by-line
+        list of 'SEVERE' error messages.
 
 
         """

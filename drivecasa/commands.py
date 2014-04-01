@@ -6,14 +6,15 @@ functions helps to prevent syntax errors, and allows for various optional
 extras such as forcing overwriting of previous datasets, automatic derivation
 of output filenames, etc.
 
-Note that all the commands have a common set of parameters:
+.. note::
 
- - script: The list to which the requested commands should be appended.
- - out_dir: The output directory to place output files in, using a derived
-   filename.
- - out_path: Overrides out_dir, specifies an output file / directory path exactly.
- - overwrite: Deletes any pre-existing data at the output location - use with
-   caution!
+    All the commands have a common set of parameters:
+     - `script`: The list to which the requested commands should be appended.
+     - `out_dir`: The output directory to place output files in, using a derived
+       filename.
+     - `out_path`: Overrides out_dir, specifies an output file / directory path exactly.
+     - `overwrite`: Deletes any pre-existing data at the output location - use with
+       caution!
 
 
 """
@@ -23,7 +24,13 @@ from drivecasa.utils import ensure_dir, derive_out_path
 import shutil
 from collections import namedtuple
 
-CleanMaps = namedtuple('CleanMaps', ('image', 'model', 'residual', 'psf', 'mask'))
+class CleanMaps(namedtuple('CleanMaps',
+                           ('image', 'model', 'residual', 'psf', 'mask'))):
+    """
+    A namedtuple for bunching together the paths to maps produced by clean.
+
+    Fields: ``('image', 'model', 'residual', 'psf', 'mask')``
+    """
 
 
 def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=False):
@@ -39,14 +46,15 @@ def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=Fa
 
 
     **Args:**
-      - script: List to which the relevant casapy command line will be appended.
-      - uvfits_path: path to input data file.
-      - out_dir: Directory in which to place output file. ``None`` signifies
-        to place output .ms in same directory as the original FITS file.
-      - out_path: Provides an override to the automatic output naming system.
-        If this is not ``None`` then the ``out_dir`` arg is ignored and the
-        specified path used instead.
-      - overwrite: Delete any pre-existing data at the output path (danger!).
+
+    - script: List to which the relevant casapy command line will be appended.
+    - uvfits_path: path to input data file.
+    - out_dir: Directory in which to place output file. ``None`` signifies
+      to place output .ms in same directory as the original FITS file.
+    - out_path: Provides an override to the automatic output naming system.
+      If this is not ``None`` then the ``out_dir`` arg is ignored and the
+      specified path used instead.
+    - overwrite: Delete any pre-existing data at the output path (danger!).
 
 
     **Returns:** Path to newly converted ms.
@@ -134,8 +142,7 @@ def clean(script,
     accordingly.
 
     **Returns**:
-      CleanMaps namedtuple, listing paths for image, model, residual, psf and
-      mask maps.
+    :py:class:`.CleanMaps` namedtuple, listing paths for resulting maps.
     """
     if other_clean_args is None:
         other_clean_args = {}

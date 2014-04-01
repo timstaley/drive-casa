@@ -32,14 +32,6 @@
     :undoc-members:
     
 
-:mod:`keys` Module
-------------------
-
-.. automodule:: drivecasa.keys
-    :members:
-    :undoc-members:
-
-
 :mod:`utils` Module
 -------------------
 

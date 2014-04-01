@@ -1,5 +1,8 @@
 """
-Routines for composing and then running CASA scripts.
+Interfacing package for scripting CASA from within a larger pipeline.
+
+Comes with several convenience routines that allow chaining of CASA commands,
+see :py:mod:`.commands` module.
 """
 
 from __future__ import absolute_import
