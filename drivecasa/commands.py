@@ -25,7 +25,7 @@ import shutil
 from collections import namedtuple
 
 class CleanMaps(namedtuple('CleanMaps',
-                           ('image', 'model', 'residual', 'psf', 'mask'))):
+                           ('image', 'model', 'residual', 'psf', 'mask', 'flux'))):
     """
     A namedtuple for bunching together the paths to maps produced by clean.
 
@@ -173,6 +173,7 @@ def clean(script,
         residual = cleaned_path + '.residual',
         psf = cleaned_path + '.psf',
         mask = cleaned_path + '.mask',
+        flux = cleaned_path + '.flux',
         )
 
     if overwrite:
