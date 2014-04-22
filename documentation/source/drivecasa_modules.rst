@@ -1,5 +1,6 @@
-:mod:`drivecasa` Package
-------------------------
+==========================
+:mod:`drivecasa` reference
+==========================
 
 .. automodule:: drivecasa.__init__
     :members:

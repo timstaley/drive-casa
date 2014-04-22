@@ -9,8 +9,9 @@ Welcome to drive-casa's documentation!
 Contents:
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
+    readme_include
     drivecasa_modules
 
 
