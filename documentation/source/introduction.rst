@@ -1,6 +1,9 @@
-==========
-drive-casa
-==========
+.. _introduction:
+
+===========================
+Introduction to drive-casa
+===========================
+
 A Python package for scripting the NRAO CASA_ pipeline routines (``casapy``).
 
 `drive-casa` provides an interface to allow dynamic
