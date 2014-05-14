@@ -16,7 +16,9 @@ class TestCasaInstallation(TestCase):
     def setUp(self):
         self.env = drivecasa.casapy_env(
                         os.environ.get('CASA_DIR', drivecasa.default_casa_dir))
-        self.known_good_casa_versions = ['4.1.0 (r24668)']
+        self.known_good_casa_versions = ['4.1.0 (r24668)',
+                                         '4.2.1 (r29048)',
+                                         ]
 
     def test_casa_version(self):
         cmd = ['casapy', '--help']

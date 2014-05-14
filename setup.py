@@ -9,7 +9,7 @@ setup(
     description="""An interfacing package for scripting CASA from within a larger pipeline.""",
     author="Tim Staley",
     author_email="timstaley337@gmail.com",
-    url="https://github.com/timstaley/drivecasa",
+    url="https://github.com/timstaley/drive-casa",
     license='BSD 3-clause',
     install_requires=['pexpect'],
 )
