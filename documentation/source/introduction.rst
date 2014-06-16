@@ -73,9 +73,22 @@ Installation
    
 drive-casa is now `pip` installable, simply run::
 
- pip install drive-casa
+    pip install drive-casa
 
 
+Developer setup
+---------------
+Those wanting to modify the source will need a git checkout, 
+followed by a git-submodule checkout to grab the test-data for the 
+unittests. So a setup script might look like this::
+
+    git clone git@github.com:timstaley/drive-casa.git
+    cd drive-casa
+    git submodule init
+    git submodule update
+    pip install -r requirements # (grab pexpect)
+    cd tests
+    nosetests -sv
 
 Documentation
 -------------
