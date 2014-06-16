@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 import drivecasa
 import os
-
+import tempfile
 from drivecasa import default_test_ouput_dir
 
 
@@ -18,6 +18,18 @@ class TestDefaultCasaInterface(TestCase):
         casa_dir = os.environ.get('CASA_DIR',
                                   drivecasa.default_casa_dir)
         cls.casa = drivecasa.Casapy(casa_dir, echo_to_stdout=False)
+
+    def test_script_file(self):
+        script = 'tasklist()\n'
+        with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+            tmpfile_path = tmpfile.name
+            tmpfile.write(script)
+        out, errors = self.casa.run_script_from_file(tmpfile_path)
+#         for l in out:
+#             print l
+        self.assertNotEqual(len(out), 0)
+        self.assertEqual(len(errors), 0)
+        os.remove(tmpfile_path)
 
     def test_basic_command(self):
         script = ['tasklist()']

@@ -161,7 +161,7 @@ class Casapy(object):
         logger.debug("*************")
         logger.debug('\n' + '\n'.join([l for l in script]))
         logger.debug("*************")
-        for line in script:
+        for cmd in script:
             # Casapy gets upset when you feed it a long command
             # The output gets filled with backspace characters as it reformats,
             # which is a PITA to parse.
@@ -169,22 +169,67 @@ class Casapy(object):
             # exec it. Oh, the perversity!
             with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
                 tmpfile_path = tmpfile.name
-                tmpfile.write(line + '\n')
-            self.child.sendline("execfile('{}')".format(tmpfile_path))
-            self.child.expect(self.prompt)
+                tmpfile.write(cmd + '\n')
+            try:
+                line_out, line_err = self.run_script_from_file(tmpfile_path,
+                                                           raise_on_severe)
+            except RuntimeError as e:
+                raise RuntimeError(
+                       "Casapy encountered a 'SEVERE' level problem running the "
+                       "command "+cmd+"\n"
+                       "Error message is as follows:\n" +
+                       e.message)
+            casa_out.extend(line_out)
+            errors.extend(line_err)
+
             os.remove(tmpfile_path)
             out_lines = self.child.before.split('\r\n')
-            # Skip the first line: 'execfile(blah)'
-            casa_out.extend(out_lines[1:])
-            for line in out_lines:
-                tokens = line.split('\t', 2)
-                if len(tokens) >= 2 and tokens[1] == 'SEVERE':
-                    errors.append(line)
-            if errors and raise_on_severe:
-                error_str = '\n'.join(errors)
-                raise RuntimeError(
-                           "Casapy encountered a 'SEVERE' level problem running the "
-                           "following command: \n"
-                           "*********\n" + "\n".join(line) + "\n*********\n" +
-                           "Errors are as follows:\n" + error_str)
+
+
+
         return casa_out, errors
+
+    def run_script_from_file(self, path_to_scriptfile, raise_on_severe=True):
+        """
+         Run the script at given path.
+
+        **Args:**
+
+        - path_to_scriptfile: Can be relative or absolute, since we apply
+          abspath conversion before passing to casapy.
+        - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
+          encountered in the logging output. Set to ``False`` if you want to
+          attempt to continue execution anyway (e.g. if you want to ignore
+          errors caused by trying to re-import UVFITs data when the outputs
+          are pre-existing from a previous run).
+
+
+        **Returns:** Tuple ``(casa_out, errors)``
+        Where ``casa_out`` is a line-by-line list containing the contents
+        of the casapy terminal output, and ``errors`` is a line-by-line
+        list of 'SEVERE' error messages.
+        """
+
+        errors_from_file = []
+        casa_out_from_file = []
+        self.child.sendline("execfile('{}')".format(
+                os.path.abspath(path_to_scriptfile)))
+        self.child.expect(self.prompt)
+        out_lines = self.child.before.split('\r\n')
+        # Skip the first line: 'execfile(blah)'
+        casa_out_from_file.extend(out_lines[1:])
+        for line in out_lines:
+            tokens = line.split('\t', 2)
+            if ( len(tokens) >= 2) and (tokens[1] == 'SEVERE'):
+                errors_from_file.append(line)
+        if errors_from_file and raise_on_severe:
+            error_str = '\n'.join(errors_from_file)
+            raise RuntimeError(
+                   "Casapy encountered a 'SEVERE' level problem running the "
+                   "script at "+path_to_scriptfile+": \n"
+                   "*********\n" +
+                   "\n".join(line) +
+                   "\n*********\n" +
+                   "Errors are as follows:\n" +
+                   error_str)
+        return casa_out_from_file, errors_from_file
