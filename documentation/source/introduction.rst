@@ -17,15 +17,16 @@ All from within a standard Python script, and preferably from a virtualenv_.
 This is particularly useful when you want to embed use of CASA within a larger
 pipeline which uses external Python libraries alongside CASA functionality.
 
-The package also includes a set of convenience routines which
-try to adhere to a consistent style and make it easy to chain together
-successive CASA reduction commands; e.g.
+`drive-casa` can be used to run plain-old-text ``casapy`` scripts
+directly; alternatively the package includes a set of convenience
+routines which try to adhere to a consistent style and make it easy to chain
+together successive CASA reduction commands to generate a ``casapy`` script
+programmatically; e.g.
 
 `importUVFITS ->
 Perform Clean on resulting MeasurementSet`
 
-is implemented
-like so::
+is implemented like so::
 
     ms = drivecasa.commands.import_uvfits(script, uvfits_path)
     dirty_maps = drivecasa.commands.clean(script, ms, niter=0, threshold_in_jy=1,
@@ -69,8 +70,13 @@ how ``drive-casa`` got started, and I quickly ran into issues with ``casapy``
 filling the stdin / stdout pipe buffers and causing the whole process to
 freeze up.
 
-Which leads us to the ``drive-casa`` approach - emulate terminal interaction
-with ``casapy`` via use of pexpect_. This has some added benefits:
+Which leads us to the `drive-casa` approach - emulate terminal interaction
+with ``casapy`` via use of pexpect_. `drive-casa` can be installed
+along with any other Python packages in the usual Python package fashion,
+since we only interface with ``casapy`` indirectly via the command line.
+The downside is that
+data has to be written to file to transfer it between the standard Python script
+and the ``casapy`` environment, but it brings some added benefits:
 
 - CASA tasks do not, as far as I can tell, return useful values as standard
   (or even throw exceptions). Instead, since the over-riding assumption is that
@@ -87,16 +93,11 @@ with ``casapy`` via use of pexpect_. This has some added benefits:
   redirect the logging output once the program has been instantiated.
   `drive-casa` can work-around this issue by simply restarting CASA with a fresh
   logging location specified for each dataset.
-- `drive-casa` can be used either to run plain-old-text ``casapy`` scripts
-  directly, or you can make use of the
-  :ref:`convenience functions <module-commands>` to make the
-  scripting process easier, as in the :ref:`example <brief-example>`.
 
 
-.. [*] For any non-astronomers reading this: yes, really.
-    I assume this reduced the user-support load for end-users who don't have a
-    good handle on how to install Python separately - which used to be mildly
-    challenging on Macs, I believe.
+.. [*] I assume this reduced the user-support load, e.g. for end-users who don't
+    have a good handle on how to install Python separately - which used to be
+    mildly challenging on Macs, I believe.
 
 .. _subprocess: https://docs.python.org/2/library/subprocess.html
 .. _pexpect: http://pypi.python.org/pypi/pexpect/
