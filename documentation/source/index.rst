@@ -3,8 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to drive-casa's documentation!
-======================================
+drive-casa
+===========
+
+Version |version|
+
+Welcome to drive-casa's documentation. If you're new here, I recommend you
+start with the :ref:`introduction <introduction>`, or you could jump straight
+to the :ref:`example <brief-example>`.
+
+
 
 Contents:
 

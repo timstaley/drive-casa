@@ -1,8 +1,6 @@
 import logging
 import os
 import sys
-import json
-import itertools
 import pexpect
 import tempfile
 import drivecasa.utils

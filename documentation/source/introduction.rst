@@ -7,35 +7,71 @@ Introduction to drive-casa
 A Python package for scripting the NRAO CASA_ pipeline routines (``casapy``).
 
 `drive-casa` provides an interface to allow dynamic
-interaction with CASA from a *separate* Python process. For example,
+interaction with CASA from a *separate* Python process.
+For example,
 one can spawn an instance of ``casapy``, send it some data reduction
 commands to run (while saving the logs for future reference),
 do some external analysis on the results,
 and then run some more casapy routines.
-All from within a generic Python 2.7 script. In a virtualenv_.
+All from within a standard Python script, and preferably from a virtualenv_.
 This is particularly useful when you want to embed use of CASA within a larger
-pipeline. 
+pipeline which uses external Python libraries alongside CASA functionality.
 
 The package also includes a set of convenience routines which
 try to adhere to a consistent style and make it easy to chain together
-successive CASA reduction commands;
-e.g. `importUVFITS -> Perform Clean on resulting MeasurementSet`.
+successive CASA reduction commands; e.g.
 
+`importUVFITS ->
+Perform Clean on resulting MeasurementSet`
+
+is implemented
+like so::
+
+    ms = drivecasa.commands.import_uvfits(script, uvfits_path)
+    dirty_maps = drivecasa.commands.clean(script, ms, niter=0, threshold_in_jy=1,
+                                         other_clean_args=clean_args)
+
+
+.. _CASA: http://casa.nrao.edu/
+.. _virtualenv: http://www.virtualenv.org/
 
 Rationale
 ---------
-CASA makes use of an altered version of IPython to provide a
-user interface, and all of the routines available are in fact Python functions.
-This means it *is* possible to write Python scripts and run them from within
-``casapy`` itself. However, there are some compelling reasons not to do so:
+Newcomers to CASA_ should note that it is trivial to run
+simple Python scripts within the ``casapy`` environment, or even to launch
+``casapy`` into a script directly from the command line, e.g.::
 
-- CASA comes bundled with its very own Python installation - until
-  CASA 4.2 (Feb 2014) this was Python 2.6, which raised potential Python version
-  compatibility issues with Python 2.7.
-  This will continue to be a problem if the user works with Python 3.
-- The 'bundled installation' model also prevents the standard practice of
-  using a virtualenv to provide reasonably well encapsulated and reproducible
-  data-reduction environments.
+    casapy --nologger -c hello_world.py
+
+While this mostly works fine from a command line or within a
+shell script, things start to get messy if you want to run CASA functions
+alongside routines from external Python libraries.
+
+
+``casapy`` uses its own bundled-and-modified copy of the Python interpreter[*],
+so a first thought might be to try and install external libraries into the CASA
+environment directly, and then run everything via the ``casapy`` interpreter.
+Indeed this
+`appears to be possible <http://kneedme.blogspot.co.uk/2011/09/install-additional-modulespackages-in_22.html>`_,
+but somewhat technically involved - it also breaks the virtualenv_ workflow,
+and requires that your external Python modules are compatible with the
+CASA-bundled version of Python (which was 2.6, until quite recently).
+
+Alternatively one can try to 'break-out' the CASA modules from the
+``casapy`` environment, but this also requires binary compatibility and some
+monkeying around with embedded paths as detailed in
+`this post from Peter Williams
+<http://newton.cx/~peter/2014/02/casa-in-python-without-casapy/>`_.
+
+At a pinch, you might be tempted to try dumping CASA command scripts to file
+and then spawning a ``casapy`` instance via subprocess_. **Don't.** This was
+how ``drive-casa`` got started, and I quickly ran into issues with ``casapy``
+filling the stdin / stdout pipe buffers and causing the whole process to
+freeze up.
+
+Which leads us to the ``drive-casa`` approach - emulate terminal interaction
+with ``casapy`` via use of pexpect_. This has some added benefits:
+
 - CASA tasks do not, as far as I can tell, return useful values as standard
   (or even throw exceptions). Instead, since the over-riding assumption is that
   the package will be run in interactive mode,
@@ -50,7 +86,20 @@ This means it *is* possible to write Python scripts and run them from within
   As far as I can tell, CASA does not provide an interface to control or
   redirect the logging output once the program has been instantiated.
   `drive-casa` can work-around this issue by simply restarting CASA with a fresh
-  logging location specified for each dataset.  
+  logging location specified for each dataset.
+- `drive-casa` can be used either to run plain-old-text ``casapy`` scripts
+  directly, or you can make use of the
+  :ref:`convenience functions <module-commands>` to make the
+  scripting process easier, as in the :ref:`example <brief-example>`.
+
+
+.. [*] For any non-astronomers reading this: yes, really.
+    I assume this reduced the user-support load for end-users who don't have a
+    good handle on how to install Python separately - which used to be mildly
+    challenging on Macs, I believe.
+
+.. _subprocess: https://docs.python.org/2/library/subprocess.html
+.. _pexpect: http://pypi.python.org/pypi/pexpect/
 
 
 Status
@@ -60,7 +109,7 @@ and I'm reasonably happy with the interface, so major breaking changes are
 unlikely at this point (no guarantees, but then you can always specify a
 ``pip install`` of a particular archival version).
 I'd be interested to hear if others find it useful, and welcome
-any pull requests.
+any bug reports or pull requests.
 
  
 Installation
@@ -68,7 +117,7 @@ Installation
 *Requirements*:
 
 - A working installation of ``casapy``.
-- `pexpect <http://pypi.python.org/pypi/pexpect/>`_ 
+- pexpect_
   (As listed in `requirements.txt`, installed automatically when using pip.) 
    
 drive-casa is now `pip` installable, simply run::
@@ -96,13 +145,15 @@ Reference documentation can be found at
 http://drive-casa.readthedocs.org,
 or generated directly from the repository using Sphinx_.
 
+.. _brief-example:
+
 A Brief Example
 ---------------
 Basic usage might go something like this::
 
    import drivecasa
    casa = drivecasa.Casapy()
-   script=[]
+   script = []
    uvfits_path = '/path/to/uvdata.fits'
    vis = drivecasa.commands.import_uvfits(script, uvfits_path)
    clean_args = {   
@@ -120,6 +171,5 @@ Basic usage might go something like this::
 After which, there should be a dirty map converted to FITS format waiting for 
 you.
 
-.. _CASA: http://casa.nrao.edu/
-.. _virtualenv: http://www.virtualenv.org/
+
 .. _Sphinx: http://sphinx-doc.org/
