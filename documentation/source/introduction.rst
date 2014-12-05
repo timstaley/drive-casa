@@ -52,11 +52,11 @@ alongside routines from external Python libraries.
 ``casapy`` uses its own bundled-and-modified copy of the Python interpreter[*],
 so a first thought might be to try and install external libraries into the CASA
 environment directly, and then run everything via the ``casapy`` interpreter.
-Indeed this
-`appears to be possible <http://kneedme.blogspot.co.uk/2011/09/install-additional-modulespackages-in_22.html>`_,
-but somewhat technically involved - it also breaks the virtualenv_ workflow,
+Thanks to `recent efforts <https://github.com/radio-astro-tools/casa-python>`_,
+this is now possible.
+However it still breaks the virtualenv_ workflow,
 and requires that your external Python modules are compatible with the
-CASA-bundled version of Python (which was 2.6, until quite recently).
+CASA-bundled version of Python.
 
 Alternatively one can try to 'break-out' the CASA modules from the
 ``casapy`` environment, but this also requires binary compatibility and some
