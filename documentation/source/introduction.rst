@@ -95,9 +95,9 @@ and the ``casapy`` environment, but it brings some added benefits:
   logging location specified for each dataset.
 
 
-.. [*] I assume this reduced the user-support load, e.g. for end-users who don't
-    have a good handle on how to install Python separately - which used to be
-    mildly challenging on Macs, I believe.
+.. [*] This provides dedicated functionality, such as displaying a logging
+    window and providing access to plotting tools - useful in interactive
+    usage but undesirable from a scripting perspective.
 
 .. _subprocess: https://docs.python.org/2/library/subprocess.html
 .. _pexpect: http://pypi.python.org/pypi/pexpect/
