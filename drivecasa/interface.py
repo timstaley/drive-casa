@@ -36,6 +36,7 @@ class Casapy(object):
     """
     def __init__(self,
                  casa_logfile=None,
+                 commands_logfile=None,
                  casa_dir=None,
                  working_dir='/tmp/drivecasa',
                  timeout=600,
@@ -43,30 +44,34 @@ class Casapy(object):
                  echo_to_stdout=False,
                  ):
         """
-        **Args:**
+        Initialise a casapy instance.
 
-          - casa_logfile: Valid options are: `None` (uses default behaviour of a
-            logfile named 'casapy-<date>-<time>.log' in the working directory),
-            `False` (do not log to file), or a string containing a path to save
-            the log to. The path may either be absolute, or specified relative
-            to the current working directory of the calling python process.
-          - working_dir: The directory casapy will be run from. Casapy drops
-            various bits of cruft into this directory, such as ipython log snippets,
-            '.last' parameter storage files, etc. You can specify this if the
-            default of `/tmp/drivecasa` isn't suitable, though it should be fine
-            on Linux.
-          - timeout: The maximum time allowed for a single casapy command to
-            complete, in seconds. It may be necessary to increase this e.g. for
-            very complex `clean` routines.
-          - log2term: Use the 'log2term' casapy flag to tell it to echo regular
-            log messages to the subprocess casa_out pipe. This provides a running
-            commentary on the process, the contents of which are returned by this
-            function. Usually only error messages are logged here.
-          - echo_to_stdout: Echo all Casapy output to the python stdout.
-            Effectively, this gives a running commentary on what's happening,
-            at the price of cluttering your working terminal. As an alternative,
-            it is recommended to open a separate terminal and ``tail -f`` the
-            casa_logfile.
+        Args:
+            casa_logfile: Valid options are: `None` (uses default behaviour of a
+                logfile named 'casapy-<date>-<time>.log' in the working directory),
+                `False` (do not log to file), or a string containing a path to save
+                the log to. The path may either be absolute, or specified relative
+                to the current working directory of the calling python process.
+            commands_logfile: Path of logfile to record all commands passed to
+                this casapy instance via scripts. If left to default of
+                ``None``, so such record is kept.
+            working_dir: The directory casapy will be run from. Casapy drops
+                various bits of cruft into this directory, such as ipython log snippets,
+                '.last' parameter storage files, etc. You can specify this if the
+                default of `/tmp/drivecasa` isn't suitable, though it should be fine
+                on Linux.
+            timeout: The maximum time allowed for a single casapy command to
+                complete, in seconds. It may be necessary to increase this e.g. for
+                very complex `clean` routines.
+            log2term: Use the 'log2term' casapy flag to tell it to echo regular
+                log messages to the subprocess casa_out pipe. This provides a running
+                commentary on the process, the contents of which are returned by this
+                function. Usually only error messages are logged here.
+            echo_to_stdout: Echo all Casapy output to the python stdout.
+                Effectively, this gives a running commentary on what's happening,
+                at the price of cluttering your working terminal. As an alternative,
+                it is recommended to open a separate terminal and ``tail -f`` the
+                casa_logfile.
 
         """
         drivecasa.utils.ensure_dir(working_dir)
@@ -89,6 +94,19 @@ class Casapy(object):
                 # (Might expect relative to python execution, but will *get*
                 # path relative to casa working dir).
                 cmd.extend(['--logfile', os.path.abspath(casa_logfile) ])
+
+        self.commands_logfile_handle = None
+        if commands_logfile is not None:
+            try:
+                if os.path.isfile(commands_logfile):
+                    raise ValueError("Will not overwrite a logfile, "
+                                 "try including a timestamp in the filename.")
+                self.commands_logfile_handle = open(commands_logfile, 'w')
+            except Exception as e:
+                logger.error("Hit an exception trying to open a commands logfile "
+                             "at " + commands_logfile)
+                raise
+
 
         if log2term:
             cmd.append('--log2term')
@@ -169,8 +187,12 @@ class Casapy(object):
                 tmpfile_path = tmpfile.name
                 tmpfile.write(cmd + '\n')
             try:
+                if self.commands_logfile_handle is not None:
+                    self.commands_logfile_handle.write(cmd+'\n')
+                    self.commands_logfile_handle.flush()
                 line_out, line_err = self.run_script_from_file(tmpfile_path,
-                                                           raise_on_severe)
+                                                       raise_on_severe,
+                                                       command_pre_logged=True)
             except RuntimeError as e:
                 raise RuntimeError(
                        "Casapy encountered a 'SEVERE' level problem running the "
@@ -187,7 +209,8 @@ class Casapy(object):
 
         return casa_out, errors
 
-    def run_script_from_file(self, path_to_scriptfile, raise_on_severe=True):
+    def run_script_from_file(self, path_to_scriptfile, raise_on_severe=True,
+                             command_pre_logged=False):
         """
          Run the script at given path.
 
@@ -210,8 +233,12 @@ class Casapy(object):
 
         errors_from_file = []
         casa_out_from_file = []
-        self.child.sendline("execfile('{}')".format(
-                os.path.abspath(path_to_scriptfile)))
+
+        exec_cmd = "execfile('{}')".format(os.path.abspath(path_to_scriptfile))
+        if not command_pre_logged and self.commands_logfile_handle is not None:
+            self.commands_logfile_handle.write(exec_cmd+'\n')
+            self.commands_logfile_handle.flush()
+        self.child.sendline(exec_cmd)
         self.child.expect(self.prompt)
         out_lines = self.child.before.split('\r\n')
         # Skip the first line: 'execfile(blah)'
