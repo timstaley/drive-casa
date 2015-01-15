@@ -17,7 +17,7 @@
 
 .. _module-commands:
 
-:mod:`drivecasa.commands` - convenience functions
+:mod:`drivecasa.commands` - Convenience functions
 -------------------------------------------------
 
 .. automodule:: drivecasa.commands

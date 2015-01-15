@@ -8,13 +8,16 @@ of output filenames, etc.
 
 .. note::
 
-    All the commands have a common set of parameters:
+    All the command composing functions have a common set of parameters:
      - `script`: The list to which the requested commands should be appended.
      - `out_dir`: The output directory to place output files in, using a derived
        filename.
      - `out_path`: Overrides out_dir, specifies an output file / directory path exactly.
      - `overwrite`: Deletes any pre-existing data at the output location - use with
        caution!
+
+    The composing functions return the paths to the files which should be
+    created once the scripted command has been executed.
 
 
 """
