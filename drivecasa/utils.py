@@ -60,3 +60,19 @@ def get_box_mask_string(centre_pix_posns, width):
                           hx=coords[0] + width / 2, hy=coords[1] + width / 2,)
     return mask
 
+def byteify(input):
+    """
+    Co-erce unicode to 'bytestring'
+
+    (or string containing unicode, or dict containing unicode)
+
+    cf http://stackoverflow.com/a/13105359/725650
+    """
+    if isinstance(input, dict):
+        return {byteify(key):byteify(value) for key,value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input

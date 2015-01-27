@@ -23,9 +23,9 @@ of output filenames, etc.
 """
 
 import os
-from drivecasa.utils import ensure_dir, derive_out_path
 import shutil
 from collections import namedtuple
+from drivecasa.utils import ensure_dir, derive_out_path, byteify
 
 class CleanMaps(namedtuple('CleanMaps',
                            ('image', 'model', 'residual', 'psf', 'mask', 'flux'))):
@@ -88,11 +88,12 @@ def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
 
     **Returns:** Path to concatenated ms.
     """
-    concat_path = out_path
+    vis_paths = byteify(vis_paths)
+    concat_path = byteify(out_path)
     if concat_path is None:
         if out_basename is None:
-            basenames = [os.path.splitext(os.path.basename(input))[0]
-                           for input in vis_paths]
+            basenames = [os.path.splitext(os.path.basename(vp))[0]
+                           for vp in vis_paths]
             concnames = 'concat_' + '_'.join(basenames) + '.ms'
         else:
             concnames = out_basename + '.ms'
@@ -147,6 +148,9 @@ def clean(script,
     **Returns**:
     :py:class:`.CleanMaps` namedtuple, listing paths for resulting maps.
     """
+    vis_path = byteify(vis_path)
+    out_path = byteify(out_path)
+
     if other_clean_args is None:
         other_clean_args = {}
     clean_args = other_clean_args

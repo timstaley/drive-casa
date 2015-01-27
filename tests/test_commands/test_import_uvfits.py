@@ -80,3 +80,20 @@ class TestImportUVFITS(TestCase):
         # Test in usual case, not-preexisting
         self.casa.run_script(script)
         self.assertTrue(os.path.isdir(expected_ms))
+
+    def test_unicode_paths(self):
+        script = []
+        expected_ms = commands.import_uvfits(
+            script,
+            unicode(self.testfile),
+            out_dir=unicode(self.output_dir),
+            out_path=unicode(
+                        os.path.join(self.output_dir, 'importuvfitsout.ms'))
+        )
+
+        # Manually ensure target does not pre-exist
+        if os.path.isdir(expected_ms):
+             shutil.rmtree(expected_ms)
+        # Test in usual case, not-preexisting
+        self.casa.run_script(script)
+        self.assertTrue(os.path.isdir(expected_ms))

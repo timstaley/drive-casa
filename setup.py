@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="drive-casa",
-    version="0.6.0",
+    version="0.6.1",
     packages=['drivecasa'],
     description="""An interfacing package for scripting CASA from within a larger pipeline.""",
     author="Tim Staley",
