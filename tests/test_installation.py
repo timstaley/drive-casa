@@ -19,6 +19,7 @@ class TestCasaInstallation(TestCase):
         self.known_good_casa_versions = ['4.1.0 (r24668)',
                                          '4.2.1 (r29048)',
                                          '4.2.2 (r30986)',
+                                         '4.3.0-REL (r31966)'
                                          ]
 
     def test_casa_version(self):
