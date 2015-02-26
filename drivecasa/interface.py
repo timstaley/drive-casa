@@ -82,6 +82,7 @@ class Casapy(object):
         # but who knows.
         cmd = [  # "casapy",
                 '--nologger',
+                '--nogui',
                 '--colors=NoColor',
     #             '--noipython',
                 ]
