@@ -106,15 +106,25 @@ and the casapy environment, but it brings some added benefits:
 .. _pexpect: http://pypi.python.org/pypi/pexpect/
 
 
-Status
-------
-I'd say drive-casa is in beta. I've used it personally for some time now,
-and I'm reasonably happy with the interface, so major breaking changes are
-unlikely at this point (no guarantees, but then you can always specify a
-``pip install`` of a particular archival version).
+Project status, licence and acknowledgement
+-------------------------------------------
+drive-casa is now in use by a few people
+other than myself, and can reasonably be used 'in production'.
+Any bug-fixes or interface changes should be accompanied by a version increment,
+so you can be assured of stability by specifying the PyPI version.
+
+The code is `BSD licensed`_.
 I'd be interested to hear if others find it useful, and welcome
 any bug reports or pull requests.
 
+If you make use of drive-casa in work leading to a publication, I ask that
+you cite *Staley and Anderson (in prep)* and the relevant
+`ASCL entry`_
+(currently on hold pending the accompanying publication - if you are likely to
+publish soon, please get in touch so I can smooth this along).
+
+ .. _BSD licensed: https://github.com/timstaley/drive-casa/blob/master/LICENCE.txt
+.. _ASCL entry: http://ascl.net/code/v/1037
  
 Installation
 ------------
