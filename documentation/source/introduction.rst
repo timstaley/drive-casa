@@ -81,21 +81,24 @@ The downside is that
 data has to be written to file to transfer it between the standard Python script
 and the casapy environment, but it brings some added benefits:
 
-- CASA tasks do not, as far as I can tell, return useful values as standard
-  (or even throw exceptions). Instead, since the over-riding assumption is that
-  the package will be run in interactive mode,
-  all information is written to stderr as part of the logging output, making it
-  hard to programmatically verify if a task has completed sucessfully.
-  drive-casa attempts to solve this by parsing the log output for 'SEVERE'
-  warnings - the user may then choose to throw an exception when
-  it is sensible to do so.
-- If scripting the reduction of large amounts of data in batches, it is 
-  often useful to record logging information along with the data output,
-  both for purposes of debugging and data provenance.
-  As far as I can tell, CASA does not provide an interface to control or
-  redirect the logging output once the program has been instantiated.
-  drive-casa can work-around this issue by simply restarting CASA with a fresh
-  logging location specified for each dataset.
+  Error handling
+    CASA tasks do not, as far as I can tell, return useful values as standard
+    (or even throw exceptions). Instead, since the over-riding assumption is that
+    the package will be run in interactive mode,
+    all information is written to stderr as part of the logging output, making it
+    hard to programmatically verify if a task has completed sucessfully.
+    drive-casa attempts to solve this by parsing the log output for 'SEVERE'
+    warnings - the user may then choose to throw an exception when
+    it is sensible to do so.
+
+  Logging / reproducibility
+    If scripting the reduction of large amounts of data in batches, it is
+    often useful to record logging information along with the data output,
+    both for purposes of debugging and data provenance.
+    As far as I can tell, CASA does not provide an interface to control or
+    redirect the logging output once the program has been instantiated.
+    drive-casa can work-around this issue by simply restarting CASA with a fresh
+    logging location specified for each dataset.
 
 
 .. [*] This provides dedicated functionality, such as displaying a logging
@@ -108,12 +111,11 @@ and the casapy environment, but it brings some added benefits:
 
 Project status, licence and acknowledgement
 -------------------------------------------
-drive-casa is now in use by a few people
+drive-casa is `BSD licensed`_.
+The package is now in use by a few people
 other than myself, and can reasonably be used 'in production'.
 Any bug-fixes or interface changes should be accompanied by a version increment,
 so you can be assured of stability by specifying the PyPI version.
-
-The code is `BSD licensed`_.
 I'd be interested to hear if others find it useful, and welcome
 any bug reports or pull requests.
 
@@ -138,6 +140,8 @@ drive-casa is now `pip` installable, simply run::
 
     pip install drive-casa
 
+
+.. _pip: http://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/
 
 Developer setup
 ---------------
