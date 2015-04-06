@@ -121,12 +121,10 @@ any bug reports or pull requests.
 
 If you make use of drive-casa in work leading to a publication, I ask that
 you cite *Staley and Anderson (in prep)* and the relevant
-`ASCL entry`_
-(currently on hold pending the accompanying publication - if you are likely to
-publish soon, please get in touch so I can smooth this along).
+`ASCL entry`_.
 
  .. _BSD licensed: https://github.com/timstaley/drive-casa/blob/master/LICENCE.txt
-.. _ASCL entry: http://ascl.net/code/v/1037
+.. _ASCL entry: http://ascl.net/1504.006
  
 Installation
 ------------
