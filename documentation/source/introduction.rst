@@ -138,8 +138,18 @@ drive-casa is now `pip` installable, simply run::
 
     pip install drive-casa
 
+.. warning:: Multiprocessing bug:
+
+    As of April 2015, the default version of pexpect available on PyPI_ is 3.3.
+    If you wish to use drive-casa in a parallel-processing context,
+    you should be aware of `this bug`_ which means
+    pexpect 3.3 is broken under multiprocessing. The fix is easy - just use
+    2.4_ (which I've now specified in the `requirements.txt` file).
 
 .. _pip: http://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/
+.. _this bug: https://github.com/pexpect/pexpect/issues/86
+.. _PyPi: https://pypi.python.org/pypi/pexpect/
+.. _2.4: https://pypi.python.org/pypi/pexpect/2.4
 
 Developer setup
 ---------------
