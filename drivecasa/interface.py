@@ -55,6 +55,10 @@ class Casapy(object):
             commands_logfile: Path of logfile to record all commands passed to
                 this casapy instance via scripts. If left to default of
                 ``None``, so such record is kept.
+            casa_dir: Path to the top-level directory containing the CASA
+                package. If the default of ``None`` is used, then drive-casa
+                will attempt to call casapy from the default $PATH, as imported
+                from ``os.environ``.
             working_dir: The directory casapy will be run from. Casapy drops
                 various bits of cruft into this directory, such as ipython log snippets,
                 '.last' parameter storage files, etc. You can specify this if the
