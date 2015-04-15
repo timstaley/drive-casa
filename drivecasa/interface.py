@@ -47,11 +47,14 @@ class Casapy(object):
         Initialise a casapy instance.
 
         Args:
-            casa_logfile: Valid options are: `None` (uses default behaviour of a
-                logfile named 'casapy-<date>-<time>.log' in the working directory),
-                `False` (do not log to file), or a string containing a path to save
-                the log to. The path may either be absolute, or specified relative
-                to the current working directory of the calling python process.
+            casa_logfile: Valid options are:
+
+                - `None` (uses default behaviour of a logfile named
+                  `casapy-<date>-<time>.log` in the working directory),
+                - `False` (do not log to file), or
+                - string containing a path to save the log to. The path may
+                  either be absolute, or specified relative to the current
+                  working directory of the calling python process.
             commands_logfile: Path of logfile to record all commands passed to
                 this casapy instance via scripts. If left to default of
                 ``None``, so such record is kept.
@@ -76,7 +79,6 @@ class Casapy(object):
                 at the price of cluttering your working terminal. As an alternative,
                 it is recommended to open a separate terminal and ``tail -f`` the
                 casa_logfile.
-
         """
         drivecasa.utils.ensure_dir(working_dir)
         # NB It would make sense to switch off ipython, ('noipython' flag)
@@ -146,6 +148,7 @@ class Casapy(object):
                 self.child=None
         if self.child is None:
             raise RuntimeError("Could not spawn CASA instance")
+
 
     def run_script(self, script, raise_on_severe=True):
         """
