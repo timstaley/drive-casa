@@ -144,7 +144,7 @@ drive-casa is now `pip` installable, simply run::
     If you wish to use drive-casa in a parallel-processing context,
     you should be aware of `this bug`_ which means
     pexpect 3.3 is broken under multiprocessing. The fix is easy - just use
-    2.4_ (which I've now specified in the `requirements.txt` file).
+    2.4_ (which I've now specified in the `setup.py` file).
 
 .. _pip: http://www.dabapps.com/blog/introduction-to-pip-and-virtualenv-python/
 .. _this bug: https://github.com/pexpect/pexpect/issues/86

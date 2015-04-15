@@ -1,1 +1,1 @@
-pexpect
+pexpect==2.4
