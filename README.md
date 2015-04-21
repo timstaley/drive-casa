@@ -17,6 +17,6 @@ you cite
 [ASCL entry](http://ascl.net/1504.006).
 
 
-[![Documentation Status](https://readthedocs.org/projects/drive-casa/badge/?version=master)](https://readthedocs.org/projects/drive-casa/?badge=master)
+[![Documentation Status](https://readthedocs.org/projects/drive-casa/badge/?version=latest)](https://readthedocs.org/projects/drive-casa/?badge=latest)
 
 
