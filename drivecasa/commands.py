@@ -113,6 +113,7 @@ def clean(script,
           niter,
           threshold_in_jy,
           mask='',
+          modelimage='',
           other_clean_args=None,
           out_dir=None,
           out_path=None,
@@ -168,7 +169,8 @@ def clean(script,
            'imagename':os.path.abspath(cleaned_path),
            'niter': niter,
            'threshold': str(threshold_in_jy) + 'Jy',
-           'mask': mask
+           'mask': mask,
+           'modelimage':modelimage
           })
     script.append("clean(**{})".format(repr(clean_args)))
 
