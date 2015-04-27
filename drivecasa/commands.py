@@ -153,7 +153,7 @@ def clean(script,
 
     if other_clean_args is None:
         other_clean_args = {}
-    clean_args = other_clean_args
+    clean_args = other_clean_args.copy()
 
     cleaned_path = out_path
     if cleaned_path is None:

@@ -65,6 +65,8 @@ def byteify(input):
     Co-erce unicode to 'bytestring'
 
     (or string containing unicode, or dict containing unicode)
+    Useful when e.g. importing filenames from JSON
+    (CASA sometimes breaks if passed Unicode strings.)
 
     cf http://stackoverflow.com/a/13105359/725650
     """
