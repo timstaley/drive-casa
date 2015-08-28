@@ -162,10 +162,10 @@ def clean(script,
             out_ext = '.dirty'
         else:
             out_ext = '.clean'
-        cleaned_path = derive_out_path(vis_path, out_dir, out_extension=out_ext)
+        cleaned_path = derive_out_path(vis_path[0] if type(vis_path) is list else vis_path, out_dir, out_extension=out_ext)
 
     clean_args.update({
-           'vis':os.path.abspath(vis_path),
+           'vis': vis_path if type(vis_path) is list else os.path.abspath(vis_path),
            'imagename':os.path.abspath(cleaned_path),
            'niter': niter,
            'threshold': str(threshold_in_jy) + 'Jy',
@@ -211,3 +211,27 @@ def export_fits(script, image_path, out_dir=None, out_path=None,
                            str(overwrite))
                  )
     return fits_path
+
+
+def mstransform(script, vis_path, out_path, other_transform_args = None, overwrite = False):
+    """
+    Useful for pre-imaging steps of interferometric data reduction.
+
+    Guide: http://www.eso.org/~scastro/ALMA/casa/MST/MSTransformDocs/MSTransformDocs.html
+    """
+    vis_path = byteify(vis_path)
+    out_path = byteify(out_path)
+
+    if other_transform_args is None:
+        other_transform_args = {}
+    transform_args = other_transform_args.copy()
+
+    transform_args.update({
+           'vis':os.path.abspath(vis_path),
+           'outputvis':os.path.abspath(out_path)
+          })
+    script.append("mstransform(**{})".format(repr(transform_args)))
+
+    if overwrite:
+        if os.path.isdir(out_path):
+            shutil.rmtree(out_path)
