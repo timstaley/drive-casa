@@ -25,10 +25,12 @@ of output filenames, etc.
 import os
 import shutil
 from collections import namedtuple
-from drivecasa.utils import ensure_dir, derive_out_path, byteify
+from drivecasa.utils import ensure_dir, derive_out_path, byteify, listify
+
 
 class CleanMaps(namedtuple('CleanMaps',
-                           ('image', 'model', 'residual', 'psf', 'mask', 'flux'))):
+                           ('image', 'model', 'residual', 'psf', 'mask',
+                            'flux'))):
     """
     A namedtuple for bunching together the paths to maps produced by clean.
 
@@ -36,7 +38,8 @@ class CleanMaps(namedtuple('CleanMaps',
     """
 
 
-def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=False):
+def import_uvfits(script, uvfits_path, out_dir=None, out_path=None,
+                  overwrite=False):
     """
     Import UVFITS and convert to .ms format.
 
@@ -48,19 +51,19 @@ def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=Fa
     then the output data will be located at */tmp/junkdata/obs1.ms*.
 
 
-    **Args:**
+    Args:
+        script: List to which the relevant casapy command line will be appended.
+        uvfits_path: path to input data file.
+        out_dir: Directory in which to place output file. ``None`` signifies
+            to place output .ms in same directory as the original FITS file.
+        out_path: Provides an override to the automatic output naming system.
+            If this is not ``None`` then the ``out_dir`` arg is ignored and the
+            specified path used instead.
+        overwrite: Delete any pre-existing data at the output path (danger!).
 
-    - script: List to which the relevant casapy command line will be appended.
-    - uvfits_path: path to input data file.
-    - out_dir: Directory in which to place output file. ``None`` signifies
-      to place output .ms in same directory as the original FITS file.
-    - out_path: Provides an override to the automatic output naming system.
-      If this is not ``None`` then the ``out_dir`` arg is ignored and the
-      specified path used instead.
-    - overwrite: Delete any pre-existing data at the output path (danger!).
 
-
-    **Returns:** Path to newly converted ms.
+    Returns:
+        Path to newly converted ms.
     """
     ms_path = out_path
     if ms_path is None:
@@ -72,12 +75,13 @@ def import_uvfits(script, uvfits_path, out_dir=None, out_path=None, overwrite=Fa
     # NB Be sure to specify the abspath as seen from current ipython process,
     # in case the user has specified relative path:
     script.append("importuvfits(fitsfile='{0}', vis='{1}')".format(
-                     os.path.abspath(uvfits_path), os.path.abspath(ms_path))
-                  )
+        os.path.abspath(uvfits_path), os.path.abspath(ms_path))
+    )
     return ms_path
 
+
 def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
-                             overwrite=False):
+           overwrite=False):
     """
     Concatenates multiple visibilities into one.
 
@@ -86,30 +90,32 @@ def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
     However, this can result in something very long and unwieldy. Alternatively
     you may specify the exact out_path, or just the out_basename.
 
-    **Returns:** Path to concatenated ms.
+    Returns:
+        Path to concatenated ms.
     """
     vis_paths = byteify(vis_paths)
     concat_path = byteify(out_path)
     if concat_path is None:
         if out_basename is None:
-            basenames = [os.path.splitext(os.path.basename(vp))[0]
-                           for vp in vis_paths]
-            concnames = 'concat_' + '_'.join(basenames) + '.ms'
+            concat_path = derive_out_path(vis_paths, out_dir,
+                                          out_extension='.ms',
+                                          out_prefix='concat_')
         else:
             concnames = out_basename + '.ms'
-        concat_path = os.path.join(out_dir, concnames)
+            concat_path = os.path.join(out_dir, concnames)
     ensure_dir(os.path.dirname(concat_path))
     if overwrite:
         if os.path.isdir(concat_path):
             shutil.rmtree(concat_path)
     abs_vis_paths = [os.path.abspath(v) for v in vis_paths]
     script.append("concat(vis={0}, concatvis='{1}')".format(
-                  str(abs_vis_paths), os.path.abspath(concat_path))
-                  )
+        str(abs_vis_paths), os.path.abspath(concat_path))
+    )
     return concat_path
 
+
 def clean(script,
-          vis_path,
+          vis_paths,
           niter,
           threshold_in_jy,
           mask='',
@@ -146,10 +152,12 @@ def clean(script,
     NB niter = 0 implies create a  'dirty' map, outputs will be named
     accordingly.
 
-    **Returns**:
-    :py:class:`.CleanMaps` namedtuple, listing paths for resulting maps.
+    Returns:
+        :py:class:`.CleanMaps` namedtuple, listing paths for resulting maps.
     """
-    vis_path = byteify(vis_path)
+    vis_paths = byteify(vis_paths)
+    vis_paths = listify(vis_paths)
+    vis_paths = [os.path.abspath(vp) for vp in vis_paths]
     out_path = byteify(out_path)
 
     if other_clean_args is None:
@@ -162,27 +170,29 @@ def clean(script,
             out_ext = '.dirty'
         else:
             out_ext = '.clean'
-        cleaned_path = derive_out_path(vis_path[0] if type(vis_path) is list else vis_path, out_dir, out_extension=out_ext)
+        cleaned_path = derive_out_path(vis_paths,
+                                       out_dir,
+                                       out_extension=out_ext)
 
     clean_args.update({
-           'vis': vis_path if type(vis_path) is list else os.path.abspath(vis_path),
-           'imagename':os.path.abspath(cleaned_path),
-           'niter': niter,
-           'threshold': str(threshold_in_jy) + 'Jy',
-           'mask': mask,
-           'modelimage':modelimage
-          })
+        'vis': vis_paths,
+        'imagename': os.path.abspath(cleaned_path),
+        'niter': niter,
+        'threshold': str(threshold_in_jy) + 'Jy',
+        'mask': mask,
+        'modelimage': modelimage
+    })
     script.append("clean(**{})".format(repr(clean_args)))
 
     ensure_dir(os.path.dirname(cleaned_path))
     expected_map_paths = CleanMaps(
-        image = cleaned_path + '.image',
-        model = cleaned_path + '.model',
-        residual = cleaned_path + '.residual',
-        psf = cleaned_path + '.psf',
-        mask = cleaned_path + '.mask',
-        flux = cleaned_path + '.flux',
-        )
+        image=cleaned_path + '.image',
+        model=cleaned_path + '.model',
+        residual=cleaned_path + '.residual',
+        psf=cleaned_path + '.psf',
+        mask=cleaned_path + '.mask',
+        flux=cleaned_path + '.flux',
+    )
 
     if overwrite:
         for path in expected_map_paths:
@@ -196,7 +206,8 @@ def export_fits(script, image_path, out_dir=None, out_path=None,
     """
     Convert an image ms to FITS format.
 
-    **Returns:** Path to resulting FITS file.
+    Returns:
+        Path to resulting FITS file.
     """
     fits_path = out_path
     if fits_path is None:
@@ -206,18 +217,23 @@ def export_fits(script, image_path, out_dir=None, out_path=None,
     # NB Be sure to specify the abspath as seen from current ipython process,
     # in case the user has specified relative path:
     script.append("exportfits(imagename='{0}', fitsimage='{1}', overwrite={2})"
-                   .format(os.path.abspath(image_path),
-                           os.path.abspath(fits_path),
-                           str(overwrite))
-                 )
+                  .format(os.path.abspath(image_path),
+                          os.path.abspath(fits_path),
+                          str(overwrite))
+                  )
     return fits_path
 
 
-def mstransform(script, vis_path, out_path, other_transform_args = None, overwrite = False):
+def mstransform(script, vis_path, out_path, other_transform_args=None,
+                overwrite=False):
     """
     Useful for pre-imaging steps of interferometric data reduction.
 
-    Guide: http://www.eso.org/~scastro/ALMA/casa/MST/MSTransformDocs/MSTransformDocs.html
+    Guide:
+    http://www.eso.org/~scastro/ALMA/casa/MST/MSTransformDocs/MSTransformDocs.html
+
+    Returns:
+        out_path
     """
     vis_path = byteify(vis_path)
     out_path = byteify(out_path)
@@ -227,11 +243,14 @@ def mstransform(script, vis_path, out_path, other_transform_args = None, overwri
     transform_args = other_transform_args.copy()
 
     transform_args.update({
-           'vis':os.path.abspath(vis_path),
-           'outputvis':os.path.abspath(out_path)
-          })
+        'vis': os.path.abspath(vis_path),
+        'outputvis': os.path.abspath(out_path)
+    })
     script.append("mstransform(**{})".format(repr(transform_args)))
 
     if overwrite:
         if os.path.isdir(out_path):
             shutil.rmtree(out_path)
+
+    return out_path
+

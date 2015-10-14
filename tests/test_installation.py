@@ -1,9 +1,7 @@
-import unittest
 from unittest import TestCase
 import drivecasa
 import os
 import subprocess
-import StringIO
 import warnings
 
 
