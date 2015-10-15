@@ -117,13 +117,16 @@ other than myself, and can reasonably be used 'in production'.
 Any bug-fixes or interface changes should be accompanied by a version increment,
 so you can be assured of stability by specifying the PyPI version.
 I'd be interested to hear if others find it useful, and welcome
-any bug reports or pull requests.
+any bug reports or pull requests. Any major changes should be recorded in the
+`change-log`_.
 
 If you make use of drive-casa in work leading to a publication, I ask that
-you cite *Staley and Anderson (in prep)* and the relevant
+you cite `Staley and Anderson (2015)`_ and the relevant
 `ASCL entry`_.
 
- .. _BSD licensed: https://github.com/timstaley/drive-casa/blob/master/LICENCE.txt
+.. _BSD licensed: https://github.com/timstaley/drive-casa/blob/master/LICENCE.txt
+.. _change-log: https://github.com/timstaley/drive-casa/blob/master/CHANGES.md
+.. _Staley and Anderson (2015): http://labs.adsabs.harvard.edu/adsabs/abs/2015arXiv150508123S/
 .. _ASCL entry: http://ascl.net/1504.006
  
 Installation

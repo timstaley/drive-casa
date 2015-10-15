@@ -152,8 +152,17 @@ def clean(script,
     NB niter = 0 implies create a  'dirty' map, outputs will be named
     accordingly.
 
+    .. warning::
+
+        This function can accept a list of multiple input visibilities. This
+        functionality is not extensively tested and should be considered
+        experimental - the CASA cookbook is vague on how parameters should be
+        passed in this use-case.
+
+
     Returns:
-        :py:class:`.CleanMaps` namedtuple, listing paths for resulting maps.
+        expected_map_paths(:py:class:`.CleanMaps`): namedtuple,
+            listing paths for resulting maps.
     """
     vis_paths = byteify(vis_paths)
     vis_paths = listify(vis_paths)
