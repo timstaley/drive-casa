@@ -30,7 +30,7 @@ class TestDefaultCasaInterface(TestCase):
         self.assertEqual(len(errors), 0)
         os.remove(tmpfile_path)
 
-    def test_casa_command(self):
+    def test_basic_command(self):
         script = ['tasklist()']
         out, errors = self.casa.run_script(script)
 #         for l in out:

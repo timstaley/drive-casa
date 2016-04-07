@@ -3,7 +3,7 @@ Drive-casa is an interfacing package for scripting of CASA from a separate
 Python process (see :ref:`introduction`).
 
 The package includes several convenience routines that allow chaining of CASA
-commands, see :py:mod:`.commands` module.
+commands, see :mod:`drivecasa.commands` module.
 """
 
 from __future__ import absolute_import

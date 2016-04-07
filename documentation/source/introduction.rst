@@ -1,8 +1,8 @@
 .. _introduction:
 
-===========================
++++++++++++++++++++++++++++
 Introduction to drive-casa
-===========================
++++++++++++++++++++++++++++
 
 A Python package for scripting the NRAO CASA_ pipeline routines (casapy).
 
@@ -197,25 +197,11 @@ signature, as detailed under :py:mod:`drivecasa.commands`.
 
 A Brief Example
 ---------------
-Basic usage might go something like this::
+Assuming you already have a uv-measurement dataset in uvFITS format,
+basic usage might go something like this:
 
-   import drivecasa
-   casa = drivecasa.Casapy()
-   script = []
-   uvfits_path = '/path/to/uvdata.fits'
-   vis = drivecasa.commands.import_uvfits(script, uvfits_path)
-   clean_args = {   
-       "spw": '0:3~7',
-       "imsize": [512, 512],
-       "cell": ['5.0arcsec'],
-       "weighting": 'briggs',
-          "robust": 0.5,
-       }
-   dirty_maps = drivecasa.commands.clean(script, vis, niter=0, threshold_in_jy=1,
-                                         other_clean_args=clean_args)
-   dirty_map_fits_image = drivecasa.commands.export_fits(script, dirty_maps.image)
-   casa.run_script(script) 
-   
+.. literalinclude:: examples/uvfits_to_dirty_map.py
+
 After which, there should be a dirty map converted to FITS format waiting for 
 you.
 

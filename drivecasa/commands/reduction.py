@@ -1,11 +1,4 @@
 """
-Provides convenience functions for composing casapy data-reduction scripts.
-
-While the casapy scripts can be composed by hand, use of convenience
-functions helps to prevent syntax errors, and allows for various optional
-extras such as forcing overwriting of previous datasets, automatic derivation
-of output filenames, etc.
-
 .. note::
 
     All the data-reduction command composing functions have a common set of parameters:
@@ -18,9 +11,8 @@ of output filenames, etc.
 
     The composing functions return the paths to the files which should be
     created once the scripted command has been executed.
-
-
 """
+
 
 import os
 import shutil
