@@ -11,5 +11,5 @@ setup(
     author_email="timstaley337@gmail.com",
     url="https://github.com/timstaley/drive-casa",
     license='BSD 3-clause',
-    install_requires=['pexpect==2.4'],
+    install_requires=['pexpect>4'],
 )
