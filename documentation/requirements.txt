@@ -1,4 +1,2 @@
-pexpect==2.4
-sphinxcontrib-napoleon
 sphinx_rtd_theme
 
