@@ -17,11 +17,9 @@ class TestImportUVFITS(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        casa_dir = os.environ.get('CASA_DIR', drivecasa.default_casa_dir)
-        cls.casa = drivecasa.Casapy(casa_dir, echo_to_stdout=False)
+        cls.casa = drivecasa.Casapy(echo_to_stdout=False)
 
     def setUp(self):
-        self.casa_dir = os.environ.get('CASA_DIR', drivecasa.default_casa_dir)
         self.output_dir = os.path.join(drivecasa.default_test_ouput_dir,
                                        'importuvfits_output')
         self.testfile = test_data.ami_uvfits_paths[0]

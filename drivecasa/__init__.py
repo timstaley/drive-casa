@@ -17,27 +17,10 @@ import drivecasa.utils
 from drivecasa.casa_env import casapy_env
 from drivecasa.interface import Casapy
 
-# Can hard-code a default casa-dir here for easy running of unit-tests,
-# if required:
-default_casa_dir = None  # (If available already via external environment paths)
-# default_casa_dir = '/opt/soft/builds/casapy-active'
 
 default_test_ouput_dir = '/tmp/drivecasa-tests'
 
 
-###########################################################
-# Versioning; see also
-# http://stackoverflow.com/questions/17583443
-###########################################################
-try:
-    _dist = get_distribution('drive-casa')
-    #The version number according to Pip:
-    _nominal_version = _dist.version
-    if not __file__.startswith(os.path.join(_dist.location, 'drivecasa')):
-        # not installed, but there is another version that *is*
-        raise DistributionNotFound
-except DistributionNotFound:
-    #The actual copy in use if a custom PYTHONPATH or local dir import is used
-    __version__ = 'Local import @ '+os.path.dirname(os.path.abspath(__file__))
-else:
-    __version__ = _nominal_version
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions

@@ -4,6 +4,7 @@ import os
 import subprocess
 import warnings
 
+from drivecasa.interface import default_casa_dir
 
 class TestCasaInstallation(TestCase):
     """Ensures that casapy is available, either through the pre-existing
@@ -12,17 +13,17 @@ class TestCasaInstallation(TestCase):
     def shortDescription(self):
         return None
     def setUp(self):
-        self.env = drivecasa.casapy_env(
-                        os.environ.get('CASA_DIR', drivecasa.default_casa_dir))
+        self.env = drivecasa.casapy_env(default_casa_dir)
         self.known_good_casa_versions = ['4.1.0 (r24668)',
                                          '4.2.1 (r29048)',
                                          '4.2.2 (r30986)',
                                          '4.3.0-REL (r31966)',
                                          '4.4.0-REL (r33623)',
+                                         '4.5.2-REL (r36115)',
                                          ]
 
     def test_casa_version(self):
-        cmd = ['casapy', '--help']
+        cmd = ['casa', '--help']
 
         output = subprocess.check_output(cmd,
                               env=self.env

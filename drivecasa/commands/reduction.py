@@ -1,5 +1,5 @@
 """
-Provides convenience functions for composing casapy scripts.
+Provides convenience functions for composing casapy data-reduction scripts.
 
 While the casapy scripts can be composed by hand, use of convenience
 functions helps to prevent syntax errors, and allows for various optional
@@ -8,7 +8,7 @@ of output filenames, etc.
 
 .. note::
 
-    All the command composing functions have a common set of parameters:
+    All the data-reduction command composing functions have a common set of parameters:
      - `script`: The list to which the requested commands should be appended.
      - `out_dir`: The output directory to place output files in, using a derived
        filename.
@@ -38,82 +38,6 @@ class CleanMaps(namedtuple('CleanMaps',
     """
 
 
-def import_uvfits(script, uvfits_path, out_dir=None, out_path=None,
-                  overwrite=False):
-    """
-    Import UVFITS and convert to .ms format.
-
-
-    If out_path is ``None``, a sensible output .ms directory path will be derived
-    by taking the FITS basename, switching the extension to .ms, and locating
-    as a subdirectory of ``out_dir``,
-    e.g. if ``uvfits_path = '/my/data/obs1.fits', out_dir = '/tmp/junkdata'``
-    then the output data will be located at */tmp/junkdata/obs1.ms*.
-
-
-    Args:
-        script: List to which the relevant casapy command line will be appended.
-        uvfits_path: path to input data file.
-        out_dir: Directory in which to place output file. ``None`` signifies
-            to place output .ms in same directory as the original FITS file.
-        out_path: Provides an override to the automatic output naming system.
-            If this is not ``None`` then the ``out_dir`` arg is ignored and the
-            specified path used instead.
-        overwrite: Delete any pre-existing data at the output path (danger!).
-
-
-    Returns:
-        Path to newly converted ms.
-    """
-    ms_path = out_path
-    if ms_path is None:
-        ms_path = derive_out_path(uvfits_path, out_dir, '.ms')
-    ensure_dir(os.path.dirname(ms_path))
-    if overwrite:
-        if os.path.isdir(ms_path):
-            shutil.rmtree(ms_path)
-    # NB Be sure to specify the abspath as seen from current ipython process,
-    # in case the user has specified relative path:
-    script.append("importuvfits(fitsfile='{0}', vis='{1}')".format(
-        os.path.abspath(uvfits_path), os.path.abspath(ms_path))
-    )
-    return ms_path
-
-
-def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
-           overwrite=False):
-    """
-    Concatenates multiple visibilities into one.
-
-    By default, output basename is derived by concatenating
-    the basenames of the input visibilities, with the prefix `concat_`.
-    However, this can result in something very long and unwieldy. Alternatively
-    you may specify the exact out_path, or just the out_basename.
-
-    Returns:
-        Path to concatenated ms.
-    """
-    vis_paths = byteify(vis_paths)
-    concat_path = byteify(out_path)
-    if concat_path is None:
-        if out_basename is None:
-            concat_path = derive_out_path(vis_paths, out_dir,
-                                          out_extension='.ms',
-                                          out_prefix='concat_')
-        else:
-            concnames = out_basename + '.ms'
-            concat_path = os.path.join(out_dir, concnames)
-    ensure_dir(os.path.dirname(concat_path))
-    if overwrite:
-        if os.path.isdir(concat_path):
-            shutil.rmtree(concat_path)
-    abs_vis_paths = [os.path.abspath(v) for v in vis_paths]
-    script.append("concat(vis={0}, concatvis='{1}')".format(
-        str(abs_vis_paths), os.path.abspath(concat_path))
-    )
-    return concat_path
-
-
 def clean(script,
           vis_paths,
           niter,
@@ -132,7 +56,8 @@ def clean(script,
     appending a `.clean` or `.dirty` suffix to the input basename. The various
     outputs are then further suffixed by casa, e.g.
     `foo.clean.image`, `foo.clean.psf`, etc. Since multiple outputs are
-    generated, this function returns a dictionary detailing the expected paths.
+    generated, this function returns a :class:`.CleanMaps` object detailing the
+    expected paths.
 
     NB Attempting to run with pre-existing outputs and ``overwrite=False``
     *will not* throw an error, in contrast to most other routines.
@@ -210,6 +135,40 @@ def clean(script,
     return expected_map_paths
 
 
+def concat(script, vis_paths, out_basename=None, out_dir=None, out_path=None,
+           overwrite=False):
+    """
+    Concatenates multiple visibilities into one.
+
+    By default, output basename is derived by concatenating
+    the basenames of the input visibilities, with the prefix `concat_`.
+    However, this can result in something very long and unwieldy. Alternatively
+    you may specify the exact out_path, or just the out_basename.
+
+    Returns:
+        Path to concatenated ms.
+    """
+    vis_paths = byteify(vis_paths)
+    concat_path = byteify(out_path)
+    if concat_path is None:
+        if out_basename is None:
+            concat_path = derive_out_path(vis_paths, out_dir,
+                                          out_extension='.ms',
+                                          out_prefix='concat_')
+        else:
+            concnames = out_basename + '.ms'
+            concat_path = os.path.join(out_dir, concnames)
+    ensure_dir(os.path.dirname(concat_path))
+    if overwrite:
+        if os.path.isdir(concat_path):
+            shutil.rmtree(concat_path)
+    abs_vis_paths = [os.path.abspath(v) for v in vis_paths]
+    script.append("concat(vis={0}, concatvis='{1}')".format(
+        str(abs_vis_paths), os.path.abspath(concat_path))
+    )
+    return concat_path
+
+
 def export_fits(script, image_path, out_dir=None, out_path=None,
                 overwrite=False):
     """
@@ -231,6 +190,48 @@ def export_fits(script, image_path, out_dir=None, out_path=None,
                           str(overwrite))
                   )
     return fits_path
+
+
+def import_uvfits(script, uvfits_path, out_dir=None, out_path=None,
+                  overwrite=False):
+    """
+    Import UVFITS and convert to .ms format.
+
+
+    If out_path is ``None``, a sensible output .ms directory path will be derived
+    by taking the FITS basename, switching the extension to .ms, and locating
+    as a subdirectory of ``out_dir``,
+    e.g. if ``uvfits_path = '/my/data/obs1.fits', out_dir = '/tmp/junkdata'``
+    then the output data will be located at */tmp/junkdata/obs1.ms*.
+
+
+    Args:
+        script: List to which the relevant casapy command line will be appended.
+        uvfits_path: path to input data file.
+        out_dir: Directory in which to place output file. ``None`` signifies
+            to place output .ms in same directory as the original FITS file.
+        out_path: Provides an override to the automatic output naming system.
+            If this is not ``None`` then the ``out_dir`` arg is ignored and the
+            specified path used instead.
+        overwrite: Delete any pre-existing data at the output path (danger!).
+
+
+    Returns:
+        Path to newly converted ms.
+    """
+    ms_path = out_path
+    if ms_path is None:
+        ms_path = derive_out_path(uvfits_path, out_dir, '.ms')
+    ensure_dir(os.path.dirname(ms_path))
+    if overwrite:
+        if os.path.isdir(ms_path):
+            shutil.rmtree(ms_path)
+    # NB Be sure to specify the abspath as seen from current ipython process,
+    # in case the user has specified relative path:
+    script.append("importuvfits(fitsfile='{0}', vis='{1}')".format(
+        os.path.abspath(uvfits_path), os.path.abspath(ms_path))
+    )
+    return ms_path
 
 
 def mstransform(script, vis_path, out_path, other_transform_args=None,
@@ -262,4 +263,3 @@ def mstransform(script, vis_path, out_path, other_transform_args=None,
             shutil.rmtree(out_path)
 
     return out_path
-

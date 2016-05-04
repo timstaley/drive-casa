@@ -5,6 +5,7 @@ import pexpect
 import tempfile
 import drivecasa.utils
 from drivecasa.casa_env import casapy_env
+import drivecasa.commands.subroutines as subroutines
 logger = logging.getLogger(__name__)
 
 # Historical note:
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 # to pexpect - at least this way we can reuse the casapy process once
 # instantiated.
 
+default_casa_dir = os.environ.get('CASA_DIR', None)
 
 class Casapy(object):
     """
@@ -37,7 +39,7 @@ class Casapy(object):
     def __init__(self,
                  casa_logfile=None,
                  commands_logfile=None,
-                 casa_dir=None,
+                 casa_dir=default_casa_dir,
                  working_dir='/tmp/drivecasa',
                  timeout=600,
                  log2term=True,
@@ -122,9 +124,9 @@ class Casapy(object):
         logger.debug(" ".join(cmd))
 
         if casa_dir is None:
-            casapy_cmd = 'casapy'  # Assume it's in $PATH
+            casapy_cmd = 'casa'  # Assume it's in $PATH
         else:
-            casapy_cmd = os.path.join(casa_dir, 'bin', 'casapy')
+            casapy_cmd = os.path.join(casa_dir, 'bin', 'casa')
 
         failed_casapy_spawns = 0
         self.child=None
@@ -148,6 +150,7 @@ class Casapy(object):
                 self.child=None
         if self.child is None:
             raise RuntimeError("Could not spawn CASA instance")
+        self.load_subroutines()
 
 
     def run_script(self, script, raise_on_severe=True):
@@ -266,3 +269,10 @@ class Casapy(object):
                    "Errors are as follows:\n" +
                    error_str)
         return casa_out_from_file, errors_from_file
+
+    def load_subroutines(self):
+        for subdef in (subroutines.def_load_antennalist,):
+            with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+                tmpfile_path = tmpfile.name
+                tmpfile.write(subdef + '\n')
+            self.run_script_from_file(tmpfile_path, command_pre_logged=True)

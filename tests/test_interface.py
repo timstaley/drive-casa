@@ -15,9 +15,7 @@ class TestDefaultCasaInterface(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        casa_dir = os.environ.get('CASA_DIR',
-                                  drivecasa.default_casa_dir)
-        cls.casa = drivecasa.Casapy(casa_dir, echo_to_stdout=False)
+        cls.casa = drivecasa.Casapy(echo_to_stdout=False)
 
     def test_script_file(self):
         script = 'tasklist()\n'
@@ -31,12 +29,38 @@ class TestDefaultCasaInterface(TestCase):
         self.assertEqual(len(errors), 0)
         os.remove(tmpfile_path)
 
-    def test_basic_command(self):
+    def test_casa_command(self):
         script = ['tasklist()']
         out, errors = self.casa.run_script(script)
 #         for l in out:
 #             print l
         self.assertNotEqual(len(out), 0)
+        self.assertEqual(len(errors), 0)
+
+    def test_python_stdout_capture(self):
+        script = ['print "Hello world"']
+        out, errors = self.casa.run_script(script)
+        # for l in out:
+            # print l
+        empty_output = True
+        for l in out:
+            if l:
+                empty_output = False
+                self.assertEqual(l, 'Hello world')
+            # print "Output line:", l
+        self.assertFalse(empty_output)
+        self.assertEqual(len(errors), 0)
+
+    @unittest.skip("Beware: result displays not captured, use 'print'.")
+    def test_python_result_capture(self):
+        script = ['2+2']
+        out, errors = self.casa.run_script(script)
+        empty_output = True
+        for l in out:
+            if l:
+                empty_output = False
+            # print "Output line:", l
+        self.assertFalse(empty_output)
         self.assertEqual(len(errors), 0)
 
     def test_error_exception(self):

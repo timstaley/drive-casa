@@ -14,14 +14,11 @@ class TestCommandLogging(TestCase):
         return None
 
     def test_command_logging(self):
-        casa_dir = os.environ.get('CASA_DIR',
-                                  drivecasa.default_casa_dir)
         with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
             commands_logfile = tmpfile.name
             #Use the temporary file path, but delete the empty file first...
             os.remove(commands_logfile)
-        casa = drivecasa.Casapy(casa_dir,
-                                    commands_logfile=commands_logfile,
+        casa = drivecasa.Casapy(commands_logfile=commands_logfile,
                                     echo_to_stdout=False)
         script = ['tasklist()']
         out, errors = casa.run_script(script)
