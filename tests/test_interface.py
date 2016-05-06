@@ -3,6 +3,7 @@ from unittest import TestCase
 import drivecasa
 import os
 import tempfile
+import pexpect.exceptions
 from drivecasa import default_test_ouput_dir
 
 
@@ -72,6 +73,15 @@ class TestDefaultCasaInterface(TestCase):
         script = ['importuvfits("dummy_in.fits", "dummy_out.ms")']
         out, errors = self.casa.run_script(script, raise_on_severe=False)
         self.assertEqual(len(errors), 1)
+
+    def test_timeout(self):
+        script = ['import math',
+                  'print math.pi',
+                  ]
+        self.casa.run_script(script)
+        with self.assertRaises(pexpect.exceptions.TIMEOUT):
+            self.casa.run_script(script, timeout=1e-5)
+
 
 
 #         print "Errors:", errors

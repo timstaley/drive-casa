@@ -153,25 +153,28 @@ class Casapy(object):
         self.load_subroutines()
 
 
-    def run_script(self, script, raise_on_severe=True):
+    def run_script(self, script, raise_on_severe=True, timeout=-1):
         """
         Run the commands listed in `script`.
 
-        **Args:**
+        Args:
+            script: A list of commands to execute.
+             (One command per list element.)
+            raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
+              encountered in the logging output. Set to ``False`` if you want to
+              attempt to continue execution anyway (e.g. if you want to ignore
+              errors caused by trying to re-import UVFITs data when the outputs
+              are pre-existing from a previous run).
+            timeout: If `-1` (the default, use the class default timeout).
+                Otherwise, specifies timeout in seconds for this command.
+                `None` implies no timeout (wait indefinitely).
 
-        - script: A list of commands to execute.
-          (One command per list element.)
-        - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
-          encountered in the logging output. Set to ``False`` if you want to
-          attempt to continue execution anyway (e.g. if you want to ignore
-          errors caused by trying to re-import UVFITs data when the outputs
-          are pre-existing from a previous run).
 
-
-        **Returns:** Tuple ``(casa_out, errors)``
-        Where ``casa_out`` is a line-by-line list containing the contents
-        of the casapy terminal output, and ``errors`` is a line-by-line
-        list of 'SEVERE' error messages.
+        Returns:
+            Tuple ``(casa_out, errors)``
+                Where ``casa_out`` is a line-by-line list containing the contents
+                of the casapy terminal output, and ``errors`` is a line-by-line
+                list of 'SEVERE' error messages.
 
 
         """
@@ -203,7 +206,8 @@ class Casapy(object):
                     self.commands_logfile_handle.flush()
                 line_out, line_err = self.run_script_from_file(tmpfile_path,
                                                        raise_on_severe,
-                                                       command_pre_logged=True)
+                                                       command_pre_logged=True,
+                                                       timeout=timeout)
             except RuntimeError as e:
                 raise RuntimeError(
                        "Casapy encountered a 'SEVERE' level problem running the "
@@ -215,31 +219,32 @@ class Casapy(object):
 
             os.remove(tmpfile_path)
             out_lines = self.child.before.split('\r\n')
-
-
-
         return casa_out, errors
 
     def run_script_from_file(self, path_to_scriptfile, raise_on_severe=True,
-                             command_pre_logged=False):
+                             command_pre_logged=False,
+                             timeout=-1):
         """
          Run the script at given path.
 
-        **Args:**
+        Args:
+            path_to_scriptfile: Can be relative or absolute, since we apply
+              abspath conversion before passing to casapy.
+            raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
+              encountered in the logging output. Set to ``False`` if you want to
+              attempt to continue execution anyway (e.g. if you want to ignore
+              errors caused by trying to re-import UVFITs data when the outputs
+              are pre-existing from a previous run).
+            timeout: If `-1` (the default, use the class default timeout).
+                Otherwise, specifies timeout in seconds for this command.
+                `None` implies no timeout (wait indefinitely).
 
-        - path_to_scriptfile: Can be relative or absolute, since we apply
-          abspath conversion before passing to casapy.
-        - raise_on_severe: Raise a ``RuntimeError`` if SEVERE messages are
-          encountered in the logging output. Set to ``False`` if you want to
-          attempt to continue execution anyway (e.g. if you want to ignore
-          errors caused by trying to re-import UVFITs data when the outputs
-          are pre-existing from a previous run).
 
-
-        **Returns:** Tuple ``(casa_out, errors)``
-        Where ``casa_out`` is a line-by-line list containing the contents
-        of the casapy terminal output, and ``errors`` is a line-by-line
-        list of 'SEVERE' error messages.
+        Returns:
+            Tuple ``(casa_out, errors)``
+                Where ``casa_out`` is a line-by-line list containing the contents
+                of the casapy terminal output, and ``errors`` is a line-by-line
+                list of 'SEVERE' error messages.
         """
 
         errors_from_file = []
@@ -250,7 +255,7 @@ class Casapy(object):
             self.commands_logfile_handle.write(exec_cmd+'\n')
             self.commands_logfile_handle.flush()
         self.child.sendline(exec_cmd)
-        self.child.expect(self.prompt)
+        self.child.expect(self.prompt,timeout=timeout)
         out_lines = self.child.before.split('\r\n')
         # Skip the first line: 'execfile(blah)'
         casa_out_from_file.extend(out_lines[1:])
