@@ -6,6 +6,7 @@ import tempfile
 import drivecasa.utils
 from drivecasa.casa_env import casapy_env
 import drivecasa.commands.subroutines as subroutines
+
 logger = logging.getLogger(__name__)
 
 # Historical note:
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 # instantiated.
 
 default_casa_dir = os.environ.get('CASA_DIR', None)
+
 
 class Casapy(object):
     """
@@ -36,6 +38,7 @@ class Casapy(object):
 
 
     """
+
     def __init__(self,
                  casa_logfile=None,
                  commands_logfile=None,
@@ -89,11 +92,11 @@ class Casapy(object):
         # NB also nologger/nogui: I suspect these are undocumented synonyms,
         # but who knows.
         cmd = [  # "casapy",
-                '--nologger',
-                '--nogui',
-                '--colors=NoColor',
-    #             '--noipython',
-                ]
+            '--nologger',
+            '--nogui',
+            '--colors=NoColor',
+            #             '--noipython',
+        ]
 
         if casa_logfile is not None:
             if casa_logfile is False:
@@ -102,20 +105,20 @@ class Casapy(object):
                 # Make path absolute, in case user has specified a relative path
                 # (Might expect relative to python execution, but will *get*
                 # path relative to casa working dir).
-                cmd.extend(['--logfile', os.path.abspath(casa_logfile) ])
+                cmd.extend(['--logfile', os.path.abspath(casa_logfile)])
 
         self.commands_logfile_handle = None
         if commands_logfile is not None:
             try:
                 if os.path.isfile(commands_logfile):
                     raise ValueError("Will not overwrite a logfile, "
-                                 "try including a timestamp in the filename.")
+                                     "try including a timestamp in the filename.")
                 self.commands_logfile_handle = open(commands_logfile, 'w')
             except Exception as e:
-                logger.error("Hit an exception trying to open a commands logfile "
-                             "at " + commands_logfile)
+                logger.error(
+                    "Hit an exception trying to open a commands logfile "
+                    "at " + commands_logfile)
                 raise
-
 
         if log2term:
             cmd.append('--log2term')
@@ -129,29 +132,28 @@ class Casapy(object):
             casapy_cmd = os.path.join(casa_dir, 'bin', 'casa')
 
         failed_casapy_spawns = 0
-        self.child=None
+        self.child = None
         while failed_casapy_spawns < 3:
             try:
                 self.child = pexpect.spawn(casapy_cmd,
-                             cmd,
-                             cwd=working_dir,
-                             env=casapy_env(casa_dir),
-                             timeout=timeout)
+                                           cmd,
+                                           cwd=working_dir,
+                                           env=casapy_env(casa_dir),
+                                           timeout=timeout)
                 if echo_to_stdout:
                     self.child.logfile_read = sys.stdout
                 self.prompt = r'CASA <[0-9]+>:'
                 self.child.expect(self.prompt, timeout=60)
                 break
             except pexpect.TIMEOUT:
-                #Try again
+                # Try again
                 failed_casapy_spawns += 1
                 logger.warning("%s CASA spawning timeouts occurred." %
-                                failed_casapy_spawns)
-                self.child=None
+                               failed_casapy_spawns)
+                self.child = None
         if self.child is None:
             raise RuntimeError("Could not spawn CASA instance")
         self.load_subroutines()
-
 
     def run_script(self, script, raise_on_severe=True, timeout=-1):
         """
@@ -178,12 +180,12 @@ class Casapy(object):
 
 
         """
-    #     casa = subprocess.Popen(cmd,
-    #                         cwd=working_dir,
-    #                         env=casapy_env(casa_dir),
-    #                         stdout=subprocess.PIPE,
-    #                         casa_out=subprocess.PIPE,
-    #                         )
+        #     casa = subprocess.Popen(cmd,
+        #                         cwd=working_dir,
+        #                         env=casapy_env(casa_dir),
+        #                         stdout=subprocess.PIPE,
+        #                         casa_out=subprocess.PIPE,
+        #                         )
 
         casa_out = []
         errors = []
@@ -202,18 +204,18 @@ class Casapy(object):
                 tmpfile.write(cmd + '\n')
             try:
                 if self.commands_logfile_handle is not None:
-                    self.commands_logfile_handle.write(cmd+'\n')
+                    self.commands_logfile_handle.write(cmd + '\n')
                     self.commands_logfile_handle.flush()
                 line_out, line_err = self.run_script_from_file(tmpfile_path,
-                                                       raise_on_severe,
-                                                       command_pre_logged=True,
-                                                       timeout=timeout)
+                                                               raise_on_severe,
+                                                               command_pre_logged=True,
+                                                               timeout=timeout)
             except RuntimeError as e:
                 raise RuntimeError(
-                       "Casapy encountered a 'SEVERE' level problem running the "
-                       "command "+cmd+"\n"
-                       "Error message is as follows:\n" +
-                       e.message)
+                    "Casapy encountered a 'SEVERE' level problem running the "
+                    "command " + cmd + "\n"
+                                       "Error message is as follows:\n" +
+                    e.message)
             casa_out.extend(line_out)
             errors.extend(line_err)
 
@@ -247,36 +249,45 @@ class Casapy(object):
                 list of 'SEVERE' error messages.
         """
 
-        errors_from_file = []
-        casa_out_from_file = []
+        casa_stdout = []
+        severe_warnings_raised = []
 
         exec_cmd = "execfile('{}')".format(os.path.abspath(path_to_scriptfile))
         if not command_pre_logged and self.commands_logfile_handle is not None:
-            self.commands_logfile_handle.write(exec_cmd+'\n')
+            self.commands_logfile_handle.write(exec_cmd + '\n')
             self.commands_logfile_handle.flush()
         self.child.sendline(exec_cmd)
-        self.child.expect(self.prompt,timeout=timeout)
+        self.child.expect(self.prompt, timeout=timeout)
         out_lines = self.child.before.split('\r\n')
         # Skip the first line: 'execfile(blah)'
-        casa_out_from_file.extend(out_lines[1:])
+        casa_stdout.extend(out_lines[1:])
         for line in out_lines:
             tokens = line.split('\t', 2)
-            if ( len(tokens) >= 2) and (tokens[1] == 'SEVERE'):
-                errors_from_file.append(line)
-        if errors_from_file and raise_on_severe:
-            error_str = '\n'.join(errors_from_file)
+            if (len(tokens) >= 2) and (tokens[1] == 'SEVERE'):
+                severe_warnings_raised.append(line)
+            if "Error:" in line:
+                raise ValueError(
+                    "Casapy probably encountered an exception running the "
+                    "script at " + path_to_scriptfile + ": \n"
+                    + "*********\n"
+                    + "\n".join(out_lines)
+                    + "\n*********\n"
+                )
+
+        if severe_warnings_raised and raise_on_severe:
+            error_str = '\n'.join(severe_warnings_raised)
             raise RuntimeError(
-                   "Casapy encountered a 'SEVERE' level problem running the "
-                   "script at "+path_to_scriptfile+": \n"
-                   "*********\n" +
-                   "\n".join(line) +
-                   "\n*********\n" +
-                   "Errors are as follows:\n" +
-                   error_str)
-        return casa_out_from_file, errors_from_file
+                "Casapy encountered a 'SEVERE' level problem running the "
+                "script at " + path_to_scriptfile + ": \n"
+                                                    "*********\n" +
+                "\n".join(line) +
+                "\n*********\n" +
+                "Errors are as follows:\n" +
+                error_str)
+        return casa_stdout, severe_warnings_raised
 
     def load_subroutines(self):
-        for subdef in (subroutines.def_load_antennalist,):
+        for subdef in subroutines.all_subroutines:
             with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
                 tmpfile_path = tmpfile.name
                 tmpfile.write(subdef + '\n')

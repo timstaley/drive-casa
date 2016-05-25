@@ -64,9 +64,14 @@ class TestDefaultCasaInterface(TestCase):
         self.assertFalse(empty_output)
         self.assertEqual(len(errors), 0)
 
-    def test_error_exception(self):
+    def test_exception_on_severe_warning(self):
         script = ['importuvfits("dummy_in.fits", "dummy_out.ms")']
         with self.assertRaises(RuntimeError):
+            out, errors = self.casa.run_script(script)
+
+    def test_exception_on_general_error(self):
+        script = ['print foobar']
+        with self.assertRaises(ValueError):
             out, errors = self.casa.run_script(script)
 
     def test_error_reporting(self):

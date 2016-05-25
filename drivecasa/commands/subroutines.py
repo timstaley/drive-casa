@@ -1,4 +1,5 @@
 
+# Load the columns from an antenna-list config file into lists.
 def_load_antennalist = """
 def drivecasa_load_antennalist(antennalist_path):
     with open(antennalist_path, 'r') as f:
@@ -16,3 +17,7 @@ def drivecasa_load_antennalist(antennalist_path):
                 d.append(float(items[3]))
     return x, y, z, d
     """
+
+all_subroutines = (
+    def_load_antennalist,
+)

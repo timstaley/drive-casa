@@ -5,7 +5,7 @@ import versioneer
 
 install_requires = [
         'astropy',
-        'pexpect>4'
+        'pexpect>4',
     ]
 
 setup(
