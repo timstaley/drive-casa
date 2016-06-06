@@ -1,3 +1,9 @@
+"""
+Define some subroutines which we pre-load into the CASA environment.
+
+These allow us to e.g. define subroutines for converting a custom file-format
+into native Python data-structures.
+"""
 
 # Load the columns from an antenna-list config file into lists.
 def_load_antennalist = """

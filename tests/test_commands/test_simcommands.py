@@ -95,7 +95,7 @@ class TestMeasurementSimulation(TestCase):
         (Not the same as ensuring they do the right thing!)
         """
         script = []
-        script.append("sm.open('{}')".format(self.output_ms_path))
+        sim.open_sim(script, self.output_ms_path)
         sim.setpb(script,
                   telescope_name='VLA',
                   primary_beam_hwhm=1.5 * u.degree,
