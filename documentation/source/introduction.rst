@@ -205,6 +205,11 @@ basic usage might go something like this:
 After which, there should be a dirty map converted to FITS format waiting for 
 you.
 
+The `examples folder`_ also contains example scripts demonstrating how to simulate
+and image a dataset from scratch.
+
+.. _examples folder: https://github.com/timstaley/drive-casa/tree/master/documentation/source/examples
+
 See also
 --------
 Note that drive-casa is designed as a fairly basic interface layer. If you're

@@ -1,6 +1,10 @@
 # Changelog
 -------------
 
+## r0.7.6 (2016-11-22)
+- Add examples scripts for data-simulation
+- Rearrange string-formatting subroutines into their own module.
+
 ## r0.7.5 (2016-05-27)
 - Catch more syntax errors when executing CASA scripts.
 - Add subroutine-calls for various CASA data-simulation commands.
