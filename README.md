@@ -12,9 +12,8 @@ For a full description, please see the accompanying paper,
 drive-casa is [BSD licensed](LICENCE.txt). 
 If you make use of drive-casa in work leading to a publication, I ask that
 you cite 
-[Staley and Anderson](https://github.com/timstaley/automated-radio-imaging-paper)
-(in prep), and the relevant 
-[ASCL entry](http://ascl.net/1504.006).
+[Staley and Anderson (2015)](https://github.com/timstaley/automated-radio-imaging-paper),
+and the relevant [ASCL entry](http://ascl.net/1504.006).
 
 
 [![Documentation Status](https://readthedocs.org/projects/drive-casa/badge/?version=latest)](https://readthedocs.org/projects/drive-casa/?badge=latest)
