@@ -20,6 +20,7 @@ class TestCasaInstallation(TestCase):
                                          '4.3.0-REL (r31966)',
                                          '4.4.0-REL (r33623)',
                                          '4.5.2-REL (r36115)',
+                                         '4.7.0',
                                          ]
 
     def test_casa_version(self):
