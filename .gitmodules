@@ -1,3 +1,0 @@
-[submodule "tests/sample_data"]
-	path = tests/sample_data
-	url = https://github.com/timstaley/drivecasa-testdata.git
