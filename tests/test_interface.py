@@ -71,8 +71,9 @@ class TestDefaultCasaInterface(TestCase):
 
     def test_exception_on_general_error(self):
         script = ['print foobar']
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as errorcontext:
             out, errors = self.casa.run_script(script)
+        print("Errors:", errorcontext.exception)
 
     def test_error_reporting(self):
         script = ['importuvfits("dummy_in.fits", "dummy_out.ms")']

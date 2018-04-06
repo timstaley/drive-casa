@@ -86,16 +86,13 @@ class Casapy(object):
                 casa_logfile.
         """
         drivecasa.utils.ensure_dir(working_dir)
-        # NB It would make sense to switch off ipython, ('noipython' flag)
-        # but doing so breaks stuff! I suspect this may be a bug.
-
         # NB also nologger/nogui: I suspect these are undocumented synonyms,
         # but who knows.
-        cmd = [  # "casapy",
+        cmd = [  # "casa",
             '--nologger',
             '--nogui',
             '--colors=NoColor',
-            #             '--noipython',
+            '--drivecasa', # Requires hacked casa/lib/python2.7/start_casa.py
         ]
 
         if casa_logfile is not None:
@@ -142,7 +139,8 @@ class Casapy(object):
                                            timeout=timeout)
                 if echo_to_stdout:
                     self.child.logfile_read = sys.stdout
-                self.prompt = r'CASA <[0-9]+>:'
+                # self.prompt = r'CASA <[0-9]+>:'
+                self.prompt = r'In \[[0-9]+\]:'
                 self.child.expect(self.prompt, timeout=60)
                 break
             except pexpect.TIMEOUT:
@@ -258,6 +256,16 @@ class Casapy(object):
             self.commands_logfile_handle.flush()
         self.child.sendline(exec_cmd)
         self.child.expect(self.prompt, timeout=timeout)
+
+        if "Error:" in self.child.before:
+            raise ValueError(
+                "Casapy probably encountered an exception running the "
+                "script at " + path_to_scriptfile + ": \n"
+                + "*********\n"
+                + self.child.before
+                + "\n*********\n"
+            )
+
         out_lines = self.child.before.split('\r\n')
         # Skip the first line: 'execfile(blah)'
         casa_stdout.extend(out_lines[1:])
